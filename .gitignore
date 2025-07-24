@@ -1,0 +1,30 @@
+# Fichier avec les clés
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Données et logs
+*.log
+*.csv
+data/historical/*.csv
+*.db
+*.sqlite
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node.js
+node_modules/

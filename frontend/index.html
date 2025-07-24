@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Trading Crypto - Interface Locale</title>
+    
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chart.css">
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-robot"></i> Bot Trading Crypto</h1>
+            <div class="header-info">
+                <span class="connection-status" id="connection-status">
+                    <i class="fas fa-circle" id="status-icon"></i>
+                    <span id="status-text">Connexion...</span>
+                </span>
+                <span class="current-time" id="current-time"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation par onglets -->
+    <nav class="tab-navigation">
+        <button id="backtest-tab" class="tab-button active">
+            <i class="fas fa-chart-line"></i>
+            Backtest
+        </button>
+        <button id="live-trading-tab" class="tab-button">
+            <i class="fas fa-play-circle"></i>
+            Live Trading
+        </button>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <!-- Onglet Backtest -->
+        <div id="backtest-content" class="tab-content active">
+            <div class="backtest-container">
+                
+                <!-- Sélection des paires de trading -->
+                <section class="section" id="trading-pairs-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-coins"></i> Paires de Trading</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <div class="checkbox-grid" id="trading-pairs-grid">
+                            <!-- Les paires seront ajoutées dynamiquement -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuration du backtest -->
+                <section class="section" id="backtest-config">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cogs"></i> Configuration du Backtest</h2>
+                    </div>
+                    <div class="section-content">
+                        <!-- Paramètres généraux -->
+                        <label class="grid-label">Paramètres généraux</label>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="timeframe">Timeframe</label>
+                                <select class="form-select" id="timeframe">
+                                    
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="strategy">Stratégie</label>
+                                <select class="form-select" id="strategy">
+                                    
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="initial-capital">Capital Initial (USDT)</label>
+                                <input class="form-input" type="number" id="initial-capital" value="0" min="100" step="100">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="start-date">Date de début</label>
+                                <input class="form-input" type="date" id="start-date">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="end-date">Date de fin</label>
+                                <input class="form-input" type="date" id="end-date">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="commission">Commission (%)</label>
+                                <input class="form-input" type="number" id="commission" value="0.1" min="0" max="1" step="0.01">
+                            </div>
+                        </div>
+
+                        <div class="separation-bar"></div>
+
+                        <!-- Paramètres de stratégie -->
+                        <label class="grid-label">Paramètres de Stratégie</label>
+                        <div class="form-grid" id="strategy-params-grid">
+                            
+                        </div>
+
+                        <div class="separation-bar"></div>
+
+                        <!-- Bouton de lancement du backtest -->
+                        <div class="actions-bar">
+                            <button id="run-backtest" class="btn btn-primary">
+                                <i class="fas fa-play"></i>
+                                Lancer le Backtest
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Résultats du backtest -->
+                <section class="section" id="backtest-results" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> Résultats du Backtest</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <!-- Métriques de performance -->
+                        <div class="card-grid" id="metrics-cards-grid">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Rendement</h3>
+                                </div>
+                                <div class="card-body">
+                                    <span class="metric-value" id="total-return">-</span>
+                                    <span class="metric-value" id="annualized-return">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Graphiques -->
+                <section class="section" id="backtest-charts" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-pie"></i> Graphiques</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <div class="charts-container" id="backtest-charts-container">
+                            <div class="chart" id="comparison-chart"></div>
+                            
+                            <!-- Graphiques 'trading view'-like pour chaque paire-->
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Historique des backtests -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-history"></i> Historique des Backtests</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="table-container">
+                            <table id="backtest-history" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Paires</th>
+                                        <th>Stratégie</th>
+                                        <th>Période</th>
+                                        <th>Rendement</th>
+                                        <th>Sharpe</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Les résultats seront ajoutés dynamiquement -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Onglet Live Trading -->
+        <div id="live-trading-content" class="tab-content">
+            <div class="live-trading-container">
+                <div class="not-implemented">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Live Trading</h2>
+                    <p>Cette fonctionnalité n'est pas encore implémentée.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Messages d'erreur/succès -->
+    <div id="error-message" class="message error-message" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="error-text"></span>
+        <button class="message-close" onclick="window.Utils.hideError()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div id="success-message" class="message success-message" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <span id="success-text"></span>
+        <button class="message-close" onclick="window.Utils.hideSuccess()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Indicateur de chargement -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span id="loading-text">Chargement...</span>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+    <!-- Scripts JavaScript -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+
+    <script src="js/backtest.js"></script>
+    <script src="js/live-trading.js"></script>
+    
+    <script src="js/main.js"></script>
+
+    <!-- Console mobile intégrée -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+
+</body>
+</html>
