@@ -92,7 +92,7 @@ trading-bot/
 ### 🔮 Phase 3 - Stratégies Avancées
 
 - [ ] **simple_ma_cross.py** : Stratégie croisement moyennes
-- [ ] **rsi_strategy.py** : Stratégie RSI complète
+- [x] **rsi_strategy.py** : Stratégie RSI complète
 - [ ] **custom_strategy.py** : Template pour nouvelles stratégies
 - [ ] Interface pour créer des stratégies personnalisées
 
