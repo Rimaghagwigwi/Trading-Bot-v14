@@ -3,6 +3,7 @@ Application Flask principale - API pour le bot de trading
 """
 
 import json
+import traceback
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import logging
@@ -11,6 +12,7 @@ from datetime import datetime
 
 import pandas as pd
 
+from backend.strategies.DCA_strategy import DCA_strategy
 from backend.strategies.RSI_strategy import RSIStrategy
 from backend.strategies.buy_and_hold import BuyAndHoldStrategy
 
@@ -131,7 +133,7 @@ def create_app():
                 )
                 if symbol_data.empty:
                     return jsonify({'error': f'Impossible de récupérer les données de marché pour {symbol}'}), 500
-                market_data[symbol] = symbol_data.set_index('timestamp', drop=False)
+                market_data[symbol] = symbol_data.set_index('timestamp', drop=True)
 
             strategy_name=request_json.get('strategy', 'buy_and_hold')
             logger.info(f"🚀 Lancement backtest: {strategy_name} sur {symbols}")
@@ -160,10 +162,12 @@ def create_app():
             logger.info(f"📊 Métriques de performance calculées")
             
             for symbol, data in market_data.items():
-                market_data[symbol]['timestamp'] = data['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-                market_data[symbol] = market_data[symbol].to_dict('list')
+                market_data[symbol].index = data.index.strftime('%Y-%m-%d %H:%M:%S')
+                market_data[symbol] = market_data[symbol].reset_index().to_dict('list')
 
             results['graph_data']['timestamp'] = [ts.strftime('%Y-%m-%d %H:%M:%S') for ts in results['graph_data']['timestamp']]
+            print("Market data formaté:")
+            print(market_data['BTCUSDC'].keys())
 
             return jsonify({
                 'success': True,
@@ -175,8 +179,9 @@ def create_app():
             })
 
         except Exception as e:
-            logger.error(f"Erreur lors du backtest: {str(e)}")
-            return jsonify({'error': f'Erreur lors du backtest: {str(e)}'}), 500
+            error_traceback = traceback.format_exc()
+            logger.error(f"Erreur lors du backtest:\n{error_traceback}")
+            return jsonify({'error': f'Erreur lors du backtest: {str(e)}\n\nTraceback:\n{error_traceback}'}), 500
 
     @app.route('/api/config/defaults')
     def get_default_config():
@@ -233,6 +238,13 @@ def create_app():
             'description': 'Acheter en survente, vendre en surachat',
             'class': 'RSIStrategy',
             'parameters': RSIStrategy.parameters
+            },
+            {
+            'name': 'DCA_strategy',
+            'display_name': 'Dollar Cost Averaging',
+            'description': 'Investir régulièrement une portion fixe',
+            'class': 'DCA_strategy',
+            'parameters': DCA_strategy.parameters
             }
         ]
         

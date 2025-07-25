@@ -10,6 +10,7 @@ from datetime import datetime
 from .portfolio import Portfolio
 from ..strategies.buy_and_hold import BuyAndHoldStrategy
 from ..strategies.RSI_strategy import RSIStrategy
+from ..strategies.DCA_strategy import DCA_strategy
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,8 @@ class BacktestEngine:
             signal_df['symbol'] = symbol
         
         # Fusion des signaux en un seul DataFrame
-        signals_df = pd.concat(signals.values(), ignore_index=True)
-        signals_df.sort_values(by='timestamp', inplace=True)
-        signals_df.set_index('timestamp', inplace=True)
+        signals_df = pd.concat(signals.values(), ignore_index=False)
+        print(signals_df)
 
         logger.info(f"{len(signals_df)} signaux générés")
 

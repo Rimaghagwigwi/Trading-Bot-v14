@@ -229,6 +229,7 @@ class ChartManager {
 
     async createCandlestickChart(graphID, display_name, graph_data) {
         console.log(`🔄 Création graphique bougies: ${graphID}`);
+        console.log(`📊 Données reçues:`, graph_data);
         const container = document.createElement('div');
         container.className = 'chart';
         container.id = graphID;

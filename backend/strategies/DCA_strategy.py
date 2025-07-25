@@ -8,45 +8,45 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class BuyAndHoldStrategy():
-    """Stratégie Buy and Hold - Acheter au début et tenir jusqu'à la fin"""
+class DCA_strategy():
+    """Stratégie DCA: Dollar Cost Averaging - Investir régulièrement une portion fixe"""
     
     parameters = {
-        'portion_buy': {'display_name': 'Portion à l\'achat', 'default': 0.5},  # Acheter 50% de la portion disponible
-        'portion_sell': {'display_name': 'Portion à la vente', 'default': 1.0},  # Vendre 100% de la position
+        'daily_investment': {'display_name': 'Investissement quotidien', 'default': 0},  # Investir 0 USDT chaque jour
+        'monthly_investment': {'display_name': 'Investissement mensuel', 'default': 100},  # Investir 100 USDT chaque mois
     }
     
     
     def __init__(self):
-        self.name = 'buy_and_hold'
+        self.name = 'DCA_strategy'
+        
     def set_params(self, params):
         use_defaults = not all(k in params for k in self.parameters)
         if use_defaults:
-            logger.info("Utilisation des paramètres par défaut pour la stratégie Buy and Hold")
+            logger.info("Utilisation des paramètres par défaut pour la stratégie DCA")
         self.params = {k: v['default'] for k, v in self.parameters.items()} if use_defaults else params
 
 
     def generate_signals(self, market_data: pd.DataFrame) -> pd.DataFrame:
+        print(market_data)
         signal_df = market_data.copy()
         signal_df['signal'] = None
-
+        
         # Signal d'achat au premier point
         signal_df.at[signal_df.index[0], 'signal'] = {
             'type': 'buy_market',
             'params': {
-                'portion': self.params['portion_buy']
-                },
+                'usdc_value': self.params['daily_investment']
+            },
         }
         
         # Signal de vente au dernier point
         signal_df.at[signal_df.index[-1], 'signal'] = {
             'type': 'sell_market',
             'params': {
-                'portion': self.params['portion_sell']
-                },
+                'portion': 1
+            },
         }
-
+        
         # Filtrer les signaux non nuls
-        signals_only = signal_df[signal_df['signal'].notnull()]
-
-        return signals_only
+        return signal_df[signal_df['signal'].notnull()]

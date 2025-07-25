@@ -52,11 +52,9 @@ class RSIStrategy():
         # Générer les signaux
         for i in range(1, len(signal_df)):
             current_rsi = signal_df['rsi'].iloc[i]
-            previous_rsi = signal_df['rsi'].iloc[i-1]
-            
-            # Signal d'achat : RSI passe au-dessus du seuil de survente
-            if (previous_rsi <= self.params['rsi_oversold'] and 
-                current_rsi > self.params['rsi_oversold']):
+
+            # Signal d'achat : RSI est en dessous du seuil de survente
+            if current_rsi <= self.params['rsi_oversold']:
                 signal_df.at[signal_df.index[i], 'signal'] = {
                     'type': 'buy_market',
                     'params': {
@@ -64,9 +62,8 @@ class RSIStrategy():
                     },
                 }
             
-            # Signal de vente : RSI passe en-dessous du seuil de surachat
-            elif (previous_rsi >= self.params['rsi_overbought'] and 
-                  current_rsi < self.params['rsi_overbought']):
+            # Signal de vente : RSI est au dessus du seuil de surachat
+            elif current_rsi >= self.params['rsi_overbought']:
                 signal_df.at[signal_df.index[i], 'signal'] = {
                     'type': 'sell_market',
                     'params': {
@@ -75,7 +72,7 @@ class RSIStrategy():
                 }
 
         # Filtrer les signaux non nuls
-        signals_only = signal_df[signal_df['signal'].notnull()]
+        signals_only = signal_df[signal_df['signal'].notnull()].drop(columns=['rsi'])
         logger.info(f"Nombre total de signaux générés: {len(signals_only)}")
         
         return signals_only

@@ -93,8 +93,15 @@ class Portfolio:
 
     def _buy_market(self, trade: Dict) -> Dict:
         """Exécute un ordre d'achat au prix du marché pour un symbole"""
-        usd_value = trade['params']['portion'] * self.cash
-        if self.cash <= 5 or self.cash < usd_value * (1 + self.commission_rate):
+        if 'portion' in trade['params']:
+            usd_value = trade['params']['portion'] * self.cash
+        elif 'usdc_value' in trade['params']:
+            usd_value = trade['params']['usdc_value']
+        else:
+            usd_value = 0
+        
+        if self.cash <= 5 or self.cash < usd_value * (1 + self.commission_rate) or usd_value <= 5:
+            # Mets un emoji rouge pour indiquer un problème
             return trade
         
         price = self.market_data[trade['symbol']].loc[trade['timestamp']]['close']
@@ -120,11 +127,11 @@ class Portfolio:
 
     def _sell_market(self, trade: Dict) -> Dict:
         """Exécute un ordre de vente au prix du marché pour un symbole""" 
+        price = self.market_data[trade['symbol']].loc[trade['timestamp']]['close']
         if trade['symbol'] not in self.positions:
             self.positions[trade['symbol']] = 0
 
         quantity = self.positions[trade['symbol']] * trade['params']['portion']
-        price = self.market_data[trade['symbol']].loc[trade['timestamp']]['close']
         usd_value = quantity * price
         if self.positions[trade['symbol']] < quantity or usd_value <= 5:
             return trade
