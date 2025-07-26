@@ -1,140 +1,145 @@
-# Projet Bot Trading Crypto
+# Crypto Trading Bot Project
 
-## 🎯 Résumé du contexte
+## 🎯 Project Overview
 
-**Objectif** : Créer un bot de trading crypto local avec interface à deux modes : Backtest et Live Trading.
+**Goal:** Build a local crypto trading bot with a dual-mode interface: Backtest and Live Trading.
 
-**Spécifications définies** :
+**Key Specifications:**
 
-- Usage local uniquement (pas de déploiement)
-- Interface : Navigation par onglets (Backtest / Live Trading)
-- Timeframes : 15m, 30m, 1h
-- Gestion des risques : Oui (stop-loss, take-profit)
-- Graphiques : Comparaison stratégie vs buy&hold
-- Stockage : Fichiers CSV
+- Local use only (no deployment)
+- Interface: Tab navigation (Backtest / Live Trading)
+- Supported timeframes: 15m, 30m, 1h
+- Risk management: Yes (stop-loss, take-profit)
+- Charts: Strategy vs buy & hold comparison
+- Data storage: CSV files
 
-**Configuration par défaut** :
+**Default Configuration:**
 
-- Capital initial : 1000 USDT
-- Commissions : 0.1% par trade
-- Période par défaut : 30 jours
-- Crypto par défaut : BTC/USDT
-- Timeframe par défaut : 1h
+- Initial capital: 1000 USDT
+- Trading fee: 0.1% per trade
+- Default period: 30 days
+- Default crypto: BTC/USDT
+- Default timeframe: 1h
 
-## 🏗️ Structure des fichiers (Simplifiée)
+## 🏗️ Simplified File Structure
 
+```
 trading-bot/
 ├── frontend/
-│   ├── index.html                 # Page principale avec navigation onglets
+│   ├── index.html                 # Main page with tab navigation
 │   ├── css/
-│   │   └── styles.css            # Styles globaux + navigation
+│   │   ├── chart.js               # Chart styles
+│   │   └── styles.css             # Global + navigation styles
 │   ├── js/
-│   │   ├── main.js               # Navigation onglets + initialisation
-│   │   ├── backtest.js           # Logique page backtest
-│   │   ├── live-trading.js       # Logique page live trading
-│   │   ├── charts.js             # Graphiques Chart.js (partagé)
-│   │   ├── api.js                # Communication backend (partagé)
-│   │   └── utils.js              # Utilitaires (partagé)
+│   │   ├── main.js                # Tab navigation + initialization
+│   │   ├── backtest.js            # Backtest page logic
+│   │   ├── live-trading.js        # Live trading page logic
+│   │   ├── charts.js              # Shared Chart.js logic
+│   │   ├── api.js                 # Shared backend communication
+│   │   └── utils.js               # Shared utilities
 ├── backend/
-│   ├── config.json               # Config timeframes et symbols
-│   ├── app.py                    # Serveur Flask (routes backtest + live)
+│   ├── config.json                # Timeframes and symbols config
+│   ├── app.py                     # Flask server (backtest + live routes)
 │   ├── strategies/
+│   │   ├── DCA_strategy.py 
+│   │   ├── RSI_strategy.py
 │   │   └── buy_and_hold.py
 │   ├── data/
-│   │   ├── historical/           # Données ohlcv en csv
-│   │   └── data_manager.py       # Gestion données + stockage csv
+│   │   ├── historical/            # OHLCV data in CSV
+│   │   └── data_manager.py        # Data handling + CSV storage
 │   ├── backtest/
-│   │   ├── backtest_engine.py    # Moteur backtest
-│   │   ├── portfolio.py          # Simulation portefeuille
-│   │   ├── performance_metrics.py # Métriques performance
+│   │   ├── backtest_engine.py     # Backtest engine
+│   │   ├── portfolio.py           # Portfolio simulation
+│   │   ├── performance_metrics.py # Performance metrics
 │   ├── trading/
-│   │   └──                       # A IMPLEMENTER
+│   │   └──                       # TO BE IMPLEMENTED
 │   └── utils/
-│       ├── logger.py             # Logs
-│       ├── validators.py         # Validation
-│       └── helpers.py            # Utilitaires
-├── requirements.txt              # Dépendances
-├── README.md                     # Documentation
-└── run.py                        # Script lancement
+│       ├── logger.py              # Logging
+│       ├── validators.py          # Validation
+│       └── helpers.py             # Utilities
+├── requirements.txt               # Dependencies
+├── README.md                      # Documentation
+└── run.py                         # Launch script
+```
 
-## 📋 Plan de développement par phases
+## 📋 Development Roadmap
 
-### ✅ Phase 1 - Backend Core (TERMINÉE)
+### ✅ Phase 1 - Backend Core (COMPLETED)
 
-- [x] Backend Flask opérationnel
-- [x] API REST avec endpoints principaux
-- [x] Moteur de backtest complet (BacktestEngine)
-- [x] Metriques de performance (PerformanceMetrics)
-- [x] Portfolio Simulé (Portfolio)
-- [x] Stratégie buy&hold implémentée
-- [x] Client Binance pour données historiques
-- [x] Stockage CSV fonctionnel
+- [x] Operational Flask backend
+- [x] REST API with main endpoints
+- [x] Complete backtest engine
+- [x] Performance metrics
+- [x] Simulated portfolio
+- [x] Buy & hold strategy implemented
+- [x] Binance client for historical data
+- [x] Functional CSV storage
 
-### 🎯 Phase 2 - Frontend avec interface Backtest et Live Trading (EN COURS)
+### 🎯 Phase 2 - Frontend: Backtest & Live Trading Interface (IN PROGRESS)
 
-#### 2.1 Préparation
+#### 2.1 Preparation
 
-- [x] **utils.js** : Ensemble de fonctions de validations, converstion, formatage
-- [x] **api.js** : Communication avec le backend
-- [x] **charts.js** : Gestion des graphiques
+- [x] **utils.js**: Validation, conversion, formatting functions
+- [x] **api.js**: Backend communication
+- [x] **charts.js**: Chart management
 
-#### 2.2 Interface principale
+#### 2.2 Main Interface
 
-- [x] **index.html** : Ajouter navigation par onglets
-- [x] **main.js** : Logique de navigation entre onglets
-- [x] **styles.css** : Styles pour navigation + structure générale
+- [x] **index.html**: Tab navigation
+- [x] **main.js**: Tab switching logic
+- [x] **styles.css**: Navigation + general styles
 
-#### 2.3 Séparation des interfaces
+#### 2.3 Interface Separation
 
-- [x] **backtest.js** : Logique isolée du backtest
-- [ ] **live_trading.js** : Logique du live trading (interface préliminaire)
+- [x] **backtest.js**: Isolated backtest logic
+- [ ] **live_trading.js**: Live trading logic (preliminary interface)
 
-### 🔮 Phase 3 - Stratégies Avancées
+### 🔮 Phase 3 - Advanced Strategies
 
-- [ ] **simple_ma_cross.py** : Stratégie croisement moyennes
-- [x] **rsi_strategy.py** : Stratégie RSI complète
-- [ ] **custom_strategy.py** : Template pour nouvelles stratégies
-- [ ] Interface pour créer des stratégies personnalisées
+- [ ] **simple_ma_cross.py**: Moving average crossover strategy
+- [x] **rsi_strategy.py**: Complete RSI strategy
+- [ ] **custom_strategy.py**: Template for new strategies
+- [ ] Interface for custom strategy creation
 
-### 🔮 Phase 4 - Live Trading Complet
+### 🔮 Phase 4 - Full Live Trading
 
-- [ ] **live_trader.py** : Système de trading en temps réel
-- [ ] **risk_manager.py** : Gestion des risques avancée
-- [ ] **order_executor.py** : Exécution ordres Binance
-- [ ] Interface de monitoring en temps réel
-- [ ] Système d'alertes et notifications
+- [ ] **live_trader.py**: Real-time trading system
+- [ ] **risk_manager.py**: Advanced risk management
+- [ ] **order_executor.py**: Binance order execution
+- [ ] Real-time monitoring interface
+- [ ] Alerts and notifications system
 
-### Onglet Live Trading (À développer)
+### Live Trading Tab (To be developed)
 
-- [ ] **Statut du bot** : ON/OFF, stratégie active
-- [ ] **Portefeuille actuel** : Soldes, positions ouvertes
-- [ ] **Graphique temps réel** : Prix + signaux de trading
-- [ ] **Historique des trades** : Trades récents avec PnL
-- [ ] **Paramètres de risque** : Stop-loss, take-profit
-- [ ] **Logs en temps réel** : Activité du bot
+- [ ] **Bot status**: ON/OFF, active strategy
+- [ ] **Current portfolio**: Balances, open positions
+- [ ] **Real-time chart**: Price + trading signals
+- [ ] **Trade history**: Recent trades with PnL
+- [ ] **Risk parameters**: Stop-loss, take-profit
+- [ ] **Live logs**: Bot activity
 
-## 📊 API Backend (Endpoints requis)
+## 📊 Backend API (Required Endpoints)
 
-### Endpoints Backtest (✅ Existants)
+### Backtest Endpoints (✅ Implemented)
 
-- `GET /api/strategies` - Liste des stratégies
-- `POST /api/backtest` - Lancer un backtest
-- `GET /api/market-data` - Données historiques
-- `GET /health` - Statut du système
+- `GET /api/strategies` - List strategies
+- `POST /api/backtest` - Run backtest
+- `GET /api/market-data` - Historical data
+- `GET /health` - System status
 
-### Endpoints Live Trading (🔮 À développer)
+### Live Trading Endpoints (🔮 To be developed)
 
-- `GET /api/live/status` - Statut du bot
-- `POST /api/live/start` - Démarrer le bot
-- `POST /api/live/stop` - Arrêter le bot
-- `GET /api/live/portfolio` - État du portefeuille
-- `GET /api/live/trades` - Historique des trades
-- `GET /api/live/logs` - Logs en temps réel
+- `GET /api/live/status` - Bot status
+- `POST /api/live/start` - Start bot
+- `POST /api/live/stop` - Stop bot
+- `GET /api/live/portfolio` - Portfolio state
+- `GET /api/live/trades` - Trade history
+- `GET /api/live/logs` - Live logs
 
-## 🛠️ Technologies utilisées
+## 🛠️ Technologies Used
 
-- **Backend** : Python, Flask, python-binance
-- **Frontend** : HTML5, CSS3, JavaScript, Chart.js
-- **Stockage** : CSV files (simple et efficace)
-- **API** : Binance REST API
-- **Architecture** : Single Page Application (SPA) simple
+- **Backend:** Python, Flask, python-binance
+- **Frontend:** HTML5, CSS3, JavaScript, Chart.js
+- **Storage:** CSV files (simple and efficient)
+- **API:** Binance REST API
+- **Architecture:** Simple Single Page Application (SPA)

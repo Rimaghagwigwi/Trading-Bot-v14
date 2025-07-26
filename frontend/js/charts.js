@@ -1,12 +1,12 @@
 /**
- * ChartManager - Gestionnaire de graphiques pour bot de trading
- * Version corrigée pour TradingView Lightweight Charts v5
+ * ChartManager - Chart manager for trading bot
+ * Fixed version for TradingView Lightweight Charts v5
  */
 
 class ChartManager {
     constructor() {
         this.charts = new Map();
-        
+
         this.chartOptions = {
             height: 400,
             layout: {
@@ -53,53 +53,53 @@ class ChartManager {
     }
 
     /**
-     * Crée un graphique de comparaison Portfolio vs Benchmark
+     * Creates a Portfolio vs Benchmark comparison chart
      */
     async createComparisonChart(graphID, display_name, graph_data) {
-        console.log(`🔄 Création graphique comparaison: ${graphID}`);
+        console.log(`🔄 Creating comparison chart: ${graphID}`);
 
         const container = document.getElementById(graphID);
 
-        // Nettoyer le conteneur
+        // Clean container
         container.innerHTML = '';
 
-        // Créer le titre
+        // Create title
         const titleDiv = document.createElement('div');
         titleDiv.className = 'chart-title';
         titleDiv.innerHTML = `<h3><i class="fas fa-chart-line"></i> ${display_name}</h3>`;
         container.appendChild(titleDiv);
 
-        // Créer le conteneur graphique
+        // Create chart container
         const chartContainer = document.createElement('div');
         chartContainer.className = 'chart-container';
         container.appendChild(chartContainer);
 
-        // Créer le graphique
+        // Create chart
         const chart = window.LightweightCharts.createChart(chartContainer, this.chartOptions);
 
-        // Préparer les données
+        // Prepare data
         const portfolioData = this.prepareLineData(graph_data.timestamp, graph_data.total_value);
         const benchmarkData = this.prepareLineData(graph_data.timestamp, graph_data.benchmark);
         const intervals = Object.keys(portfolioData);
-        console.log(`📊 Intervalles valides: ${intervals.join(', ')}`);
+        console.log(`📊 Valid intervals: ${intervals.join(', ')}`);
 
-        // Créer les séries avec la nouvelle API v5
+        // Create series with new API v5
         const portfolioSeries = chart.addSeries(window.LightweightCharts.LineSeries, this.seriesOptions.portfolio);
         const benchmarkSeries = chart.addSeries(window.LightweightCharts.LineSeries, this.seriesOptions.benchmark);
         this.setSeriesTimeframe(portfolioSeries, portfolioData, intervals[0]);
         this.setSeriesTimeframe(benchmarkSeries, benchmarkData, intervals[0]);
 
-        // Ajouter redimensionnement
+        // Add resize observer
         this.setupResizeObserver(chart, chartContainer);
 
-        // Ajouter les boutons de contrôle
+        // Add control buttons
         this.addChartControls(container, chart);
         const controlsDiv = container.querySelector('.chart-controls');
 
-        console.log(`🔄 Ajout des boutons d'intervalle: ${intervals}`);
+        console.log(`🔄 Adding interval buttons: ${intervals}`);
         for (const interval of intervals) {
             const button = document.createElement('button');
-            console.log(`🔘 Ajout bouton intervalle: ${interval}`);
+            console.log(`🔘 Adding interval button: ${interval}`);
             button.innerText = interval;
             button.className = 'btn btn-sm btn-secondary chart-timeframe-btn';
             button.addEventListener('click', () => {
@@ -110,7 +110,7 @@ class ChartManager {
             controlsDiv.appendChild(button);
         }
 
-        console.log(`✅ Graphique comparaison ${graphID} créé`);
+        console.log(`✅ Comparison chart ${graphID} created`);
         this.charts.set(graphID, {'chart': chart, 'series': [portfolioSeries, benchmarkSeries]});
         return chart;
     }
@@ -134,33 +134,33 @@ class ChartManager {
         if (!Array.isArray(timestamps) || !Array.isArray(values)) {
             throw new Error('Both timestamps and values must be arrays');
         }
-        
+
         if (timestamps.length !== values.length) {
             throw new Error('Timestamps and values arrays must have the same length');
         }
-        
+
         if (timestamps.length === 0) {
             return {};
         }
 
-        // Parse timestamps - pas besoin de trier car intervalle régulier
+        // Parse timestamps - no need to sort as interval is regular
         const parsedData = timestamps.map((timestamp, index) => ({
             time: new Date(timestamp).getTime() / 1000,
             value: values[index]
         }));
 
-        // Filtrer les données invalides
+        // Filter invalid data
         const validData = parsedData.filter(item => !isNaN(item.time) && !isNaN(item.value));
-        
+
         if (validData.length < 2) {
             return { 'raw': validData };
         }
 
-        // Calculer l'intervalle source (régulier)
+        // Calculate source interval (regular)
         const sourceInterval = validData[1].time - validData[0].time;
         const timeSpan = validData[validData.length - 1].time - validData[0].time;
 
-        // Définir les timeframes disponibles
+        // Define available timeframes
         const timeframes = {
             '1m': 60,
             '5m': 300,
@@ -172,48 +172,46 @@ class ChartManager {
             '1w': 604800
         };
 
-        // Sélectionner les timeframes valides
+        // Select valid timeframes
         const validTimeframes = Object.entries(timeframes).filter(([name, interval]) => {
-            // Le timeframe doit être un multiple de l'intervalle source
+            // Timeframe must be a multiple of source interval
             const isMultiple = interval % sourceInterval === 0 || interval >= sourceInterval;
-            
-            // Doit avoir au moins 5 points finaux pour être utile
+
+            // Must have at least 5 final points to be useful
             const hasEnoughFinalPoints = timeSpan / interval >= 4;
-            
-            // Le timeframe doit être plus grand que l'intervalle source
+
+            // Timeframe must be larger than source interval
             const isLargerThanSource = interval >= sourceInterval;
-            
+
             return isMultiple && hasEnoughFinalPoints && isLargerThanSource;
         });
 
-        // Si aucun timeframe valide, retourner les données originales
+        // If no valid timeframe, return original data
         if (validTimeframes.length === 0) {
             return { 'raw': validData };
         }
 
         const results = {};
 
-        // Traiter chaque timeframe valide
+        // Process each valid timeframe
         validTimeframes.forEach(([intervalName, intervalSeconds]) => {
-            // result[intervalName] = this.downsampleRegularData(validData, intervalSeconds, sourceInterval);
-
             const result = [];
             const pointsPerBucket = Math.round(intervalSeconds / sourceInterval);
-            
-            // Aligner le temps de départ sur une limite d'intervalle
+
+            // Align start time to interval boundary
             const startTime = validData[0].time;
             const alignedStartTime = Math.floor(startTime / intervalSeconds) * intervalSeconds;
 
             for (let i = 0; i < validData.length; i += pointsPerBucket) {
-                // Récupérer les points pour ce bucket
+                // Get points for this bucket
                 const bucketPoints = validData.slice(i, Math.min(i + pointsPerBucket, validData.length));
-                
+
                 if (bucketPoints.length === 0) continue;
 
-                // Calculer la moyenne des valeurs
+                // Calculate average value
                 const avgValue = bucketPoints.reduce((sum, point) => sum + point.value, 0) / bucketPoints.length;
-                
-                // Le temps du bucket est basé sur le premier point du bucket, aligné
+
+                // Bucket time is based on first point of bucket, aligned
                 const bucketTime = alignedStartTime + Math.floor(i / pointsPerBucket) * intervalSeconds;
 
                 result.push({
@@ -228,32 +226,32 @@ class ChartManager {
     }
 
     async createCandlestickChart(graphID, display_name, graph_data) {
-        console.log(`🔄 Création graphique bougies: ${graphID}`);
-        console.log(`📊 Données reçues:`, graph_data);
+        console.log(`🔄 Creating candlestick chart: ${graphID}`);
+        console.log(`📊 Data received:`, graph_data);
         const container = document.createElement('div');
         container.className = 'chart';
         container.id = graphID;
 
         document.getElementById('backtest-charts-container').appendChild(container);
 
-        // Nettoyer le conteneur
+        // Clean container
         container.innerHTML = '';
 
-        // Créer le titre
+        // Create title
         const titleDiv = document.createElement('div');
         titleDiv.className = 'chart-title';
         titleDiv.innerHTML = `<h3><i class="fas fa-chart-line"></i> ${display_name}</h3>`;
         container.appendChild(titleDiv);
 
-        // Créer le conteneur graphique
+        // Create chart container
         const chartContainer = document.createElement('div');
         chartContainer.className = 'chart-container';
         container.appendChild(chartContainer);
 
-        // Créer le graphique
+        // Create chart
         const chart = window.LightweightCharts.createChart(chartContainer, this.chartOptions);
 
-        // Préparer les données
+        // Prepare data
         const timestamps = graph_data.timestamp;
         const open = graph_data.open;
         const high = graph_data.high;
@@ -262,23 +260,23 @@ class ChartManager {
 
         const candlestickData = this.prepareCandlestickData(timestamps, open, high, low, close);
         const intervals = Object.keys(candlestickData);
-        console.log(`📊 Intervalles valides: ${intervals.join(', ')}`);
+        console.log(`📊 Valid intervals: ${intervals.join(', ')}`);
 
-        // Créer les séries avec la nouvelle API v5
+        // Create series with new API v5
         const candlestickSeries = chart.addSeries(window.LightweightCharts.CandlestickSeries, this.seriesOptions.candlestick);
         this.setSeriesTimeframe(candlestickSeries, candlestickData, intervals[0]);
 
-        // Ajouter redimensionnement
+        // Add resize observer
         this.setupResizeObserver(chart, chartContainer);
 
-        // Ajouter les boutons de contrôle
+        // Add control buttons
         this.addChartControls(container, chart);
         const controlsDiv = container.querySelector('.chart-controls');
 
-        console.log(`🔄 Ajout des boutons d'intervalle: ${intervals}`);
+        console.log(`🔄 Adding interval buttons: ${intervals}`);
         for (const interval of intervals) {
             const button = document.createElement('button');
-            console.log(`🔘 Ajout bouton intervalle: ${interval}`);
+            console.log(`🔘 Adding interval button: ${interval}`);
             button.innerText = interval;
             button.className = 'btn btn-sm btn-secondary chart-timeframe-btn';
             button.addEventListener('click', () => {
@@ -288,7 +286,7 @@ class ChartManager {
             controlsDiv.appendChild(button);
         }
 
-        console.log(`✅ Graphique chandeliers ${graphID} créé`);
+        console.log(`✅ Candlestick chart ${graphID} created`);
         this.charts.set(graphID, {'chart': chart, 'series': [candlestickSeries]});
         return chart;
     }
@@ -305,11 +303,11 @@ class ChartManager {
             });
         }
 
-        // Calculer l'intervalle source (régulier)
+        // Calculate source interval (regular)
         const sourceInterval = rawCandlestickData[1].time - rawCandlestickData[0].time;
         const timeSpan = rawCandlestickData[rawCandlestickData.length - 1].time - rawCandlestickData[0].time;
 
-        // Définir les timeframes disponibles
+        // Define available timeframes
         const timeframes = {
             '1m': 60,
             '5m': 300,
@@ -322,7 +320,7 @@ class ChartManager {
         };
 
         const candlestickData = {};
-        // Sélectionner les timeframes valides
+        // Select valid timeframes
         const validTimeframes = Object.entries(timeframes).filter(([name, interval]) => {
             return timeSpan / interval >= 4 && interval >= sourceInterval;
         });
@@ -352,11 +350,11 @@ class ChartManager {
     addSignalsToChart(graphID, signals) {
         const chart = this.charts.get(graphID);
         if (!chart) return;
-        console.log(`🔄 Ajout des signaux au graphique: ${graphID}`)
+        console.log(`🔄 Adding signals to chart: ${graphID}`)
 
         const markers = [];
         signals.forEach(signal => {
-            console.log(`🔘 Ajout signal: ${signal.type} à ${signal.timestamp}`);
+            console.log(`🔘 Adding signal: ${signal.type} at ${signal.timestamp}`);
             markers.push({
                 time: new Date(signal.timestamp).getTime() / 1000,
                 position: signal.type === 'buy' ? 'belowBar' : 'aboveBar',
@@ -365,8 +363,8 @@ class ChartManager {
                 text: signal.type === 'buy' ? 'BUY' : 'SELL',
             });
         });
-        console.log(`📊 Nombre de signaux ajoutés: ${markers.length}`);
-        console.log('Séries avant ajout des marqueurs:', chart['series'][0]);
+        console.log(`📊 Number of signals added: ${markers.length}`);
+        console.log('Series before adding markers:', chart['series'][0]);
         window.LightweightCharts.createSeriesMarkers(chart['series'][0], markers);
     }
 
@@ -377,11 +375,11 @@ class ChartManager {
     }
 
     /**
-     * Configure l'observateur de redimensionnement
+     * Sets up resize observer
      */
     setupResizeObserver(chart, container) {
         if (!window.ResizeObserver) {
-            console.log('⚠️ ResizeObserver non supporté');
+            console.log('⚠️ ResizeObserver not supported');
             return;
         }
 
@@ -398,23 +396,23 @@ class ChartManager {
     }
 
     /**
-     * Ajoute les contrôles du graphique
+     * Adds chart controls
      */
     addChartControls(container, chart) {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'chart-controls';
 
-        // Bouton pour ajuster le graphique
+        // Button to fit chart
         const fitButton = document.createElement('button');
-        fitButton.innerHTML = `<i class="fas fa-expand-arrows-alt"></i> Ajuster`;
+        fitButton.innerHTML = `<i class="fas fa-expand-arrows-alt"></i> Fit`;
         fitButton.className = 'btn btn-sm btn-secondary chart-control-btn';
         fitButton.addEventListener('click', () => chart.timeScale().fitContent());
         controlsDiv.appendChild(fitButton);
 
-        // Bouton pour réinitialiser le zoom
+        // Button to reset zoom
         const scrollButton = document.createElement('button');
         scrollButton.className = 'btn btn-sm btn-secondary chart-control-btn';
-        scrollButton.innerHTML = `<i class="fas fa-fast-forward"></i> Temps réel`;
+        scrollButton.innerHTML = `<i class="fas fa-fast-forward"></i> Real time`;
         scrollButton.addEventListener('click', () => chart.timeScale().scrollToRealTime());
         controlsDiv.appendChild(scrollButton);
 
@@ -422,31 +420,31 @@ class ChartManager {
     }
 
     /**
-     * Supprime un graphique
+     * Removes a chart
      */
     removeChart(graphID) {
-        console.log(`🗑️ Suppression graphique: ${graphID}`);
-        
+        console.log(`🗑️ Removing chart: ${graphID}`);
+
         const chart = this.charts.get(graphID);
         if (chart?.remove) {
             chart.remove();
         }
-        
+
         this.charts.delete(graphID);
-        this.chartData.delete(graphID);
-        this.chartSeries.delete(graphID);
-        
+        this.chartData?.delete?.(graphID);
+        this.chartSeries?.delete?.(graphID);
+
         const container = document.getElementById(graphID);
         if (container) {
             container.innerHTML = '';
         }
-        
-        console.log(`✅ Graphique ${graphID} supprimé`);
+
+        console.log(`✅ Chart ${graphID} removed`);
         return true;
     }
 }
 
-// Initialisation
+// Initialization
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.chartManager = new ChartManager();

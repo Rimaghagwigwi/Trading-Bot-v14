@@ -1,12 +1,12 @@
 /**
- * main.js - Gestion de la navigation et initialisation de l'application
+ * main.js - Navigation management and application initialization
  * 
- * Fonctionnalités :
- * - Navigation par onglets (Backtest / Live Trading)
- * - Initialisation de l'application
- * - Gestion du statut de connexion
- * - Horloge en temps réel
- * - Gestion des événements globaux
+ * Features:
+ * - Tab navigation (Backtest / Live Trading)
+ * - Application initialization
+ * - Connection status management
+ * - Real-time clock
+ * - Global event handling
  */
 
 class MainApp {
@@ -16,7 +16,7 @@ class MainApp {
         this.connectionCheckInterval = null;
         this.timeUpdateInterval = null;
         
-        // Références aux éléments DOM
+        // DOM element references
         this.tabs = {
             backtest: document.getElementById('backtest-tab'),
             liveTrading: document.getElementById('live-trading-tab')
@@ -37,45 +37,45 @@ class MainApp {
     }
 
     /**
-     * Initialise l'application
+     * Initializes the application
      */
     async init() {
-        console.log('🚀 Initialisation de l\'application...');
+        console.log('🚀 Initializing application...');
         
         try {
-            // Initialisation des événements
+            // Initialize events
             this.setupEventListeners();
             
-            // Initialisation de l'horloge
+            // Initialize clock
             this.initClock();
             
-            // Test de connexion au backend
+            // Test backend connection
             await this.checkConnection();
             
-            // Démarrage des intervalles
+            // Start intervals
             this.startIntervals();
             
             this.isInitialized = true;
-            console.log('✅ Application initialisée avec succès');
+            console.log('✅ Application initialized successfully');
             
-            // Affichage du message de bienvenue
+            // Show welcome message
             this.showWelcomeMessage();
             
         } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation:', error);
-            window.Utils.showError('Erreur lors de l\'initialisation de l\'application');
+            console.error('❌ Error during initialization:', error);
+            window.Utils.showError('Error during application initialization');
         }
     }
 
     /**
-     * Configure les event listeners raccourcis clavier
+     * Sets up keyboard shortcut event listeners
      */
     setupEventListeners() {
-        // Navigation entre onglets
+        // Tab navigation
         this.tabs.backtest.addEventListener('click', () => this.switchTab('backtest'));
         this.tabs.liveTrading.addEventListener('click', () => this.switchTab('liveTrading'));
         
-        // Raccourcis clavier
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey) {
                 switch (e.key) {
@@ -95,21 +95,21 @@ class MainApp {
             }
         });
         
-        // Gestion de la fermeture de la fenêtre
+        // Window close handling
         window.addEventListener('beforeunload', (e) => {
             if (this.isLiveTradingActive()) {
                 e.preventDefault();
-                e.returnValue = 'Le bot de trading est actif. Êtes-vous sûr de vouloir quitter ?';
+                e.returnValue = 'The trading bot is active. Are you sure you want to leave?';
                 return e.returnValue;
             }
         });
         
-        // Gestion du redimensionnement
+        // Resize handling
         window.addEventListener('resize', () => {
             this.handleResize();
         });
         
-        // Gestion de la visibilité de la page
+        // Page visibility handling
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.onPageHidden();
@@ -120,31 +120,31 @@ class MainApp {
     }
 
     /**
-     * Bascule entre les onglets
+     * Switches between tabs
      */
     switchTab(tabName) {
         if (this.currentTab === tabName) return;
         
-        console.log(`🔄 Basculement vers l'onglet: ${tabName}`);
+        console.log(`🔄 Switching to tab: ${tabName}`);
         
-        // Désactiver l'onglet actuel
+        // Deactivate current tab
         this.tabs[this.currentTab].classList.remove('active');
         this.tabContents[this.currentTab].classList.remove('active');
         
-        // Activer le nouvel onglet
+        // Activate new tab
         this.currentTab = tabName;
         this.tabs[this.currentTab].classList.add('active');
         this.tabContents[this.currentTab].classList.add('active');
         
-        // Notifier le changement d'onglet
+        // Notify tab change
         this.onTabChange(tabName);
         
-        // Sauvegarder la préférence
+        // Save preference
         window.Utils.saveToStorage('currentTab', tabName);
     }
 
     /**
-     * Gestionnaire du changement d'onglet
+     * Tab change handler
      */
     onTabChange(tabName) {
         switch (tabName) {
@@ -162,10 +162,10 @@ class MainApp {
     }
 
     /**
-     * Actualise l'onglet actuel
+     * Refreshes the current tab
      */
     refreshCurrentTab() {
-        console.log(`🔄 Actualisation de l'onglet: ${this.currentTab}`);
+        console.log(`🔄 Refreshing tab: ${this.currentTab}`);
         
         switch (this.currentTab) {
             case 'backtest':
@@ -182,7 +182,7 @@ class MainApp {
     }
 
     /**
-     * Vérifie la connexion au backend
+     * Checks backend connection
      */
     async checkConnection() {
         try {
@@ -190,29 +190,29 @@ class MainApp {
             this.updateConnectionStatus(isConnected);
             return isConnected;
         } catch (error) {
-            console.error('❌ Erreur de connexion:', error);
+            console.error('❌ Connection error:', error);
             this.updateConnectionStatus(false);
             return false;
         }
     }
 
     /**
-     * Met à jour le statut de connexion
+     * Updates connection status
      */
     updateConnectionStatus(isConnected) {
         if (isConnected) {
             this.statusElements.icon.className = 'fas fa-circle text-success';
-            this.statusElements.text.textContent = 'Connecté';
+            this.statusElements.text.textContent = 'Connected';
             this.statusElements.container.className = 'connection-status connected';
         } else {
             this.statusElements.icon.className = 'fas fa-circle text-danger';
-            this.statusElements.text.textContent = 'Déconnecté';
+            this.statusElements.text.textContent = 'Disconnected';
             this.statusElements.container.className = 'connection-status disconnected';
         }
     }
 
     /**
-     * Initialise l'horloge
+     * Initializes the clock
      */
     initClock() {
         this.updateTime();
@@ -222,7 +222,7 @@ class MainApp {
     }
 
     /**
-     * Met à jour l'heure affichée
+     * Updates displayed time
      */
     updateTime() {
         const now = new Date();
@@ -232,17 +232,17 @@ class MainApp {
 
 
     /**
-     * Démarre les intervalles
+     * Starts intervals
      */
     startIntervals() {
-        // Vérification de connexion toutes les 30 secondes
+        // Check connection every 30 seconds
         this.connectionCheckInterval = setInterval(() => {
             this.checkConnection();
         }, 30000);
     }
 
     /**
-     * Arrête les intervalles
+     * Stops intervals
      */
     stopIntervals() {
         if (this.connectionCheckInterval) {
@@ -257,112 +257,112 @@ class MainApp {
     }
 
     /**
-     * Vérifie si le live trading est actif
+     * Checks if live trading is active
      */
     isLiveTradingActive() {
         return window.LiveTradingManager && window.LiveTradingManager.isActive();
     }
 
     /**
-     * Gestion du redimensionnement
+     * Handles resize
      */
     handleResize() {
-        // Notifier les gestionnaires de graphiques
+        // Notify chart managers
         if (window.ChartManager) {
             window.ChartManager.handleResize();
         }
     }
 
     /**
-     * Page cachée
+     * Page hidden
      */
     onPageHidden() {
-        console.log('📱 Page cachée - Pause des mises à jour');
-        // Réduire la fréquence des mises à jour
+        console.log('📱 Page hidden - Pausing updates');
+        // Reduce update frequency
     }
 
     /**
      * Page visible
      */
     onPageVisible() {
-        console.log('👁️ Page visible - Reprise des mises à jour');
-        // Reprendre les mises à jour normales
+        console.log('👁️ Page visible - Resuming updates');
+        // Resume normal updates
         this.checkConnection();
     }
 
     /**
-     * Affiche le message de bienvenue
+     * Shows welcome message
      */
     showWelcomeMessage() {
-        window.Utils.showSuccess('Application initialisée avec succès !');
+        window.Utils.showSuccess('Application initialized successfully!');
         
-        // Cacher le message après 3 secondes
+        // Hide message after 3 seconds
         setTimeout(() => {
             window.Utils.hideSuccess();
         }, 3000);
     }
 
     /**
-     * Nettoyage avant destruction
+     * Cleanup before destruction
      */
     destroy() {
         this.stopIntervals();
         
-        // Nettoyage des event listeners
+        // Cleanup event listeners
         document.removeEventListener('keydown', this.handleKeydown);
         window.removeEventListener('beforeunload', this.handleBeforeUnload);
         window.removeEventListener('resize', this.handleResize);
         document.removeEventListener('visibilitychange', this.handleVisibilityChange);
         
-        console.log('🧹 Application nettoyée');
+        console.log('🧹 Application cleaned up');
     }
 }
 
-// Instance globale
+// Global instance
 window.MainApp = null;
 
-// Initialisation au chargement de la page
+// Initialization on DOM load
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 DOM chargé - Initialisation en cours...');
+    console.log('📄 DOM loaded - Initializing...');
     
     try {
-        // Création de l'instance principale
+        // Create main instance
         window.MainApp = new MainApp();
         
-        // Attendre que tous les scripts soient chargés
+        // Wait for all scripts to load
         await window.MainApp.init();
         
     } catch (error) {
-        console.error('❌ Erreur fatale lors de l\'initialisation:', error);
+        console.error('❌ Fatal error during initialization:', error);
         
-        // Affichage d'un message d'erreur à l'utilisateur
+        // Show error message to user
         const errorDiv = document.createElement('div');
         errorDiv.className = 'fatal-error';
         errorDiv.innerHTML = `
-            <h2>Erreur d'initialisation</h2>
-            <p>Une erreur fatale s'est produite lors du chargement de l'application.</p>
-            <p>Veuillez vérifier que le backend est démarré et recharger la page.</p>
-            <button onclick="location.reload()">Recharger la page</button>
+            <h2>Initialization Error</h2>
+            <p>A fatal error occurred while loading the application.</p>
+            <p>Please check that the backend is running and reload the page.</p>
+            <button onclick="location.reload()">Reload page</button>
         `;
         document.body.appendChild(errorDiv);
     }
 });
 
-// Nettoyage avant fermeture
+// Cleanup before closing
 window.addEventListener('beforeunload', () => {
     if (window.MainApp) {
         window.MainApp.destroy();
     }
 });
 
-// Gestionnaire d'erreurs globales
+// Global error handler
 window.addEventListener('error', (event) => {
-    console.error('❌ Erreur JavaScript globale:', event.error);
+    console.error('❌ Global JavaScript error:', event.error);
     
-    // Affichage d'un message d'erreur à l'utilisateur
+    // Show error message to user
     if (window.Utils) {
-        window.Utils.showError('Une erreur inattendue s\'est produite. Veuillez recharger la page.');
+        window.Utils.showError('An unexpected error occurred. Please reload the page.');
     }
     event.preventDefault();
-    return true; // Empêche le navigateur de gérer l'erreur
+    return true; // Prevent browser default error handling
 });

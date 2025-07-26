@@ -1,6 +1,6 @@
 /**
- * API.js - Communication avec le backend Flask
- * Gère toutes les interactions avec les endpoints REST
+ * API.js - Communication with Flask backend
+ * Handles all interactions with REST endpoints
  */
 
 class ApiClient {
@@ -13,24 +13,24 @@ class ApiClient {
     }
 
     /**
-     * Initialise l'API client (vérification de connexion)
+     * Initializes the API client (connection check)
      */
     async init() {
-        console.log('🚀 Initialisation du client API...');
+        console.log('🚀 Initializing API client...');
         
         const connectionTest = await this.testConnection();
         
         if (connectionTest.success) {
-            console.log('✅ Connexion API établie');
+            console.log('✅ API connection established');
             return true;
         } else {
-            console.error('❌ Impossible de se connecter au backend');
+            console.error('❌ Unable to connect to backend');
             return false;
         }
     }
 
     /**
-     * Méthode générique pour les requêtes HTTP
+     * Generic method for HTTP requests
      */
     async request(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
@@ -42,21 +42,21 @@ class ApiClient {
         try {
             const response = await fetch(url, config);
             
-            // Vérifier si la réponse est OK
+            // Check if response is OK
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
-                throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `HTTP Error ${response.status}`);
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`Erreur API [${endpoint}]:`, error);
+            console.error(`API Error [${endpoint}]:`, error);
             throw error;
         }
     }
 
     /**
-     * Méthodes HTTP génériques
+     * Generic HTTP methods
      */
     async get(endpoint, params = {}) {
         const queryString = new URLSearchParams(params).toString();
@@ -88,29 +88,29 @@ class ApiClient {
     }
 
     // ==========================================
-    // ENDPOINTS BACKTEST
+    // BACKTEST ENDPOINTS
     // ==========================================
 
     /**
-     * Récupère la liste des stratégies disponibles
+     * Gets the list of available strategies
      */
     async getStrategies() {
         return this.get('/api/strategies');
     }
 
     /**
-     * Récupère les données de marché historiques
+     * Gets historical market data
      */
     async getMarketData(symbol, timeframe, startDate, endDate) {
-        // Validation des paramètres
+        // Parameter validation
         if (!Utils.validateCryptoSymbol(symbol)) {
-            throw new Error('Symbole crypto invalide');
+            throw new Error('Invalid crypto symbol');
         }
         if (!Utils.validateTimeframe(timeframe)) {
-            throw new Error('Timeframe invalide');
+            throw new Error('Invalid timeframe');
         }
         if (!Utils.validateDateRange(startDate, endDate)) {
-            throw new Error('Période de dates invalide');
+            throw new Error('Invalid date range');
         }
 
         const params = {
@@ -124,12 +124,12 @@ class ApiClient {
     }
 
     /**
-     * Lance un backtest
+     * Runs a backtest
      */
     async runBacktest(config) {
-        // Validation de la configuration
+        // Config validation
         if (!this.validateBacktestConfig(config)) {
-            throw new Error('Configuration de backtest invalide');
+            throw new Error('Invalid backtest configuration');
         }
 
         config.symbols = config.symbols.map(Utils.normalizeSymbol);
@@ -138,32 +138,32 @@ class ApiClient {
     }
 
     /**
-     * Récupère l'historique des backtests
+     * Gets backtest history
      */
     async getBacktestHistory(limit = 50) {
         return this.get('/api/backtest/history', { limit });
     }
 
     /**
-     * Récupère les détails d'un backtest spécifique
+     * Gets details of a specific backtest
      */
     async getBacktestDetails(backtestId) {
         return this.get(`/api/backtest/${backtestId}`);
     }
 
     // ==========================================
-    // ENDPOINTS LIVE TRADING (À développer)
+    // LIVE TRADING ENDPOINTS (To be developed)
     // ==========================================
 
     /**
-     * Récupère le statut du bot de trading
+     * Gets the trading bot status
      */
     async getLiveStatus() {
         return this.get('/api/live/status');
     }
 
     /**
-     * Démarre le bot de trading
+     * Starts the trading bot
      */
     async startLiveTrading(config) {
         this.validateLiveTradingConfig(config);
@@ -171,121 +171,121 @@ class ApiClient {
     }
 
     /**
-     * Arrête le bot de trading
+     * Stops the trading bot
      */
     async stopLiveTrading() {
         return this.post('/api/live/stop');
     }
 
     /**
-     * Récupère l'état du portefeuille
+     * Gets portfolio state
      */
     async getPortfolio() {
         return this.get('/api/live/portfolio');
     }
 
     /**
-     * Récupère l'historique des trades
+     * Gets trade history
      */
     async getTradeHistory(limit = 100) {
         return this.get('/api/live/trades', { limit });
     }
 
     /**
-     * Récupère les logs en temps réel
+     * Gets real-time logs
      */
     async getLiveLogs(limit = 200) {
         return this.get('/api/live/logs', { limit });
     }
 
     /**
-     * Met à jour les paramètres de risque
+     * Updates risk parameters
      */
     async updateRiskParameters(params) {
         return this.put('/api/live/risk-params', params);
     }
 
     // ==========================================
-    // ENDPOINTS SYSTÈME
+    // SYSTEM ENDPOINTS
     // ==========================================
 
     /**
-     * Vérifie la santé du système
+     * Checks system health
      */
     async getHealth() {
         return this.get('/health');
     }
 
     /**
-     * Récupère les configurations par défaut
+     * Gets default configurations
      */
     async getDefaultConfig() {
         return this.get('/api/config/defaults');
     }
 
     /**
-     * Récupère les timeframes disponibles
+     * Gets available timeframes
      */
     async getAvailableTimeframes() {
         return this.get('/api/config/timeframes');
     }
 
     /**
-     * Récupère les symboles crypto disponibles
+     * Gets available crypto symbols
      */
     async getAvailableSymbols() {
         return this.get('/api/config/symbols');
     }
 
     /**
-     * Récupère les stratégies disponibles
+     * Gets available strategies
      */
     async getAvailableStrategies() {
         return this.get('/api/config/strategies');
     }
 
     // ==========================================
-    // MÉTHODES DE VALIDATION
+    // VALIDATION METHODS
     // ==========================================
 
     /**
-     * Valide la configuration de backtest
+     * Validates backtest configuration
      */
     validateBacktestConfig(config) {
         const required = ['symbols', 'timeframe', 'strategy', 'strategy_params', 'initial_capital', 'start_date', 'end_date', 'commission_rate'];
         for (const field of required) {
             if (!config[field]) {
-                throw new Error(`Champ requis manquant: ${field}`);
+                throw new Error(`Missing required field: ${field}`);
             }
         }
         return true;
     }
 
     /**
-     * Valide la configuration de live trading
+     * Validates live trading configuration
      */
     validateLiveTradingConfig(config) {
         if (!config) {
-            throw new Error('Configuration de trading manquante');
+            throw new Error('Missing trading configuration');
         } else {
             return true;
         }
     }
 
     // ==========================================
-    // MÉTHODES UTILITAIRES
+    // UTILITY METHODS
     // ==========================================
 
     /**
-     * Gère les erreurs d'API avec messages utilisateur
+     * Handles API errors with user messages
      */
     handleApiError(error, context = '') {
-        const errorMessage = error.message || 'Erreur inconnue';
+        const errorMessage = error.message || 'Unknown error';
         const fullMessage = context ? `${context}: ${errorMessage}` : errorMessage;
         
-        console.error('Erreur API:', fullMessage);
+        console.error('API Error:', fullMessage);
         
-        // Afficher l'erreur à l'utilisateur
+        // Show error to user
         if (Utils.showError) {
             Utils.showError(fullMessage);
         }
@@ -298,7 +298,7 @@ class ApiClient {
     }
 
     /**
-     * Wrapper pour les appels API avec gestion d'erreurs
+     * Wrapper for API calls with error handling
      */
     async safeApiCall(apiMethod, context = '', showLoading = true) {
         try {
@@ -327,64 +327,64 @@ class ApiClient {
     }
 
     /**
-     * Teste la connexion avec le backend
+     * Tests connection with backend
      */
     async testConnection() {
         return this.safeApiCall(
             () => this.getHealth(),
-            'Test de connexion'
+            'Connection test'
         );
     }
 }
 
 // ==========================================
-// INSTANCES ET EXPORTS
+// INSTANCES AND EXPORTS
 // ==========================================
 
-// Instance globale du client API
+// Global instance of API client
 const apiClient = new ApiClient();
 
-// Export vers l'objet global window pour utilisation dans d'autres fichiers
+// Export to global window object for use in other files
 window.API = {
     client: apiClient,
     
-    // Méthodes de raccourci pour les opérations courantes
+    // Shortcut methods for common operations
     backtest: {
         getMarketData: (symbol, timeframe, startDate, endDate) => 
-            apiClient.safeApiCall(() => apiClient.getMarketData(symbol, timeframe, startDate, endDate), 'Récupération des données de marché'),
-        run: (config) => apiClient.safeApiCall(() => apiClient.runBacktest(config), 'Lancement du backtest'),
-        getHistory: (limit) => apiClient.safeApiCall(() => apiClient.getBacktestHistory(limit), 'Récupération de l\'historique'),
-        getDetails: (id) => apiClient.safeApiCall(() => apiClient.getBacktestDetails(id), 'Récupération des détails')
+            apiClient.safeApiCall(() => apiClient.getMarketData(symbol, timeframe, startDate, endDate), 'Fetching market data'),
+        run: (config) => apiClient.safeApiCall(() => apiClient.runBacktest(config), 'Running backtest'),
+        getHistory: (limit) => apiClient.safeApiCall(() => apiClient.getBacktestHistory(limit), 'Fetching history'),
+        getDetails: (id) => apiClient.safeApiCall(() => apiClient.getBacktestDetails(id), 'Fetching details')
     },
     
     live: {
-        getStatus: () => apiClient.safeApiCall(() => apiClient.getLiveStatus(), 'Récupération du statut'),
-        start: (config) => apiClient.safeApiCall(() => apiClient.startLiveTrading(config), 'Démarrage du trading'),
-        stop: () => apiClient.safeApiCall(() => apiClient.stopLiveTrading(), 'Arrêt du trading'),
-        getPortfolio: () => apiClient.safeApiCall(() => apiClient.getPortfolio(), 'Récupération du portefeuille'),
-        getTrades: (limit) => apiClient.safeApiCall(() => apiClient.getTradeHistory(limit), 'Récupération des trades'),
-        getLogs: (limit) => apiClient.safeApiCall(() => apiClient.getLiveLogs(limit), 'Récupération des logs'),
-        updateParameters: (params) => apiClient.safeApiCall(() => apiClient.updateLiveParameters(params), 'Mise à jour des paramètres de trading')
+        getStatus: () => apiClient.safeApiCall(() => apiClient.getLiveStatus(), 'Fetching status'),
+        start: (config) => apiClient.safeApiCall(() => apiClient.startLiveTrading(config), 'Starting trading'),
+        stop: () => apiClient.safeApiCall(() => apiClient.stopLiveTrading(), 'Stopping trading'),
+        getPortfolio: () => apiClient.safeApiCall(() => apiClient.getPortfolio(), 'Fetching portfolio'),
+        getTrades: (limit) => apiClient.safeApiCall(() => apiClient.getTradeHistory(limit), 'Fetching trades'),
+        getLogs: (limit) => apiClient.safeApiCall(() => apiClient.getLiveLogs(limit), 'Fetching logs'),
+        updateParameters: (params) => apiClient.safeApiCall(() => apiClient.updateLiveParameters(params), 'Updating trading parameters')
     },
     
     config: {
-        getDefaults: () => apiClient.safeApiCall(() => apiClient.getDefaultConfig(), 'Récupération de la configuration'),
-        getTimeframes: () => apiClient.safeApiCall(() => apiClient.getAvailableTimeframes(), 'Récupération des timeframes'),
-        getSymbols: () => apiClient.safeApiCall(() => apiClient.getAvailableSymbols(), 'Récupération des symboles'),
-        getStrategies: () => apiClient.safeApiCall(() => apiClient.getAvailableStrategies(), 'Récupération des stratégies')
+        getDefaults: () => apiClient.safeApiCall(() => apiClient.getDefaultConfig(), 'Fetching configuration'),
+        getTimeframes: () => apiClient.safeApiCall(() => apiClient.getAvailableTimeframes(), 'Fetching timeframes'),
+        getSymbols: () => apiClient.safeApiCall(() => apiClient.getAvailableSymbols(), 'Fetching symbols'),
+        getStrategies: () => apiClient.safeApiCall(() => apiClient.getAvailableStrategies(), 'Fetching strategies')
     },
     
-    // Méthodes utilitaires
+    // Utility methods
     testConnection: () => apiClient.testConnection(),
     init: () => apiClient.init()
 };
 
-// Auto-initialisation au chargement
+// Auto-initialize on load
 document.addEventListener('DOMContentLoaded', async () => {
     await window.API.init();
 });
 
-// Export pour les modules (si utilisé)
+// Export for modules (if used)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { ApiClient, apiClient };
 }

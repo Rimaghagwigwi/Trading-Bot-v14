@@ -1,5 +1,5 @@
 // ====================================
-// UTILS.JS - Fonctions utilitaires
+// UTILS.JS - Utility functions
 // ====================================
 
 // ====================================
@@ -7,10 +7,10 @@
 // ====================================
 
 /**
- * Valide un montant (capital, prix, etc.)
- * @param {string|number} value - Valeur à valider
- * @param {number} min - Valeur minimale (défaut: 0)
- * @param {number} max - Valeur maximale (défaut: Infinity)
+ * Validates an amount (capital, price, etc.)
+ * @param {string|number} value - Value to validate
+ * @param {number} min - Minimum value (default: 0)
+ * @param {number} max - Maximum value (default: Infinity)
  * @returns {boolean}
  */
 function validateAmount(value, min = 0, max = Infinity) {
@@ -19,9 +19,9 @@ function validateAmount(value, min = 0, max = Infinity) {
 }
 
 /**
- * Valide une période de dates
- * @param {string} startDate - Date de début (format YYYY-MM-DD)
- * @param {string} endDate - Date de fin (format YYYY-MM-DD)
+ * Validates a date range
+ * @param {string} startDate - Start date (format YYYY-MM-DD)
+ * @param {string} endDate - End date (format YYYY-MM-DD)
  * @returns {boolean}
  */
 function validateDateRange(startDate, endDate) {
@@ -33,8 +33,8 @@ function validateDateRange(startDate, endDate) {
 }
 
 /**
- * Valide un symbole crypto (ex: BTC/USDT, BTCUSDT)
- * @param {string} symbol - Symbole à valider
+ * Validates a crypto symbol (e.g. BTC/USDT, BTCUSDT)
+ * @param {string} symbol - Symbol to validate
  * @returns {boolean}
  */
 function validateCryptoSymbol(symbol) {
@@ -43,9 +43,9 @@ function validateCryptoSymbol(symbol) {
 }
 
 /**
- * Valide un timeframe
- * @param {string} timeframe - Timeframe à valider
- * @returns {boolean}
+ * Validates timeframes
+ * @param {string[]} timeframes - Timeframes to validate
+ * @returns {string[]}
  */
 function validateTimeframes(timeframes) {
     const validTimeframes = ['5m', '15m', '30m', '1h', '4h', '1d'];
@@ -63,8 +63,8 @@ function validateStrategies(strategies) {
 }
 
 /**
- * Valide un pourcentage (0-100)
- * @param {string|number} value - Valeur à valider
+ * Validates a percentage (0-100)
+ * @param {string|number} value - Value to validate
  * @returns {boolean}
  */
 function validatePercentage(value) {
@@ -72,13 +72,13 @@ function validatePercentage(value) {
 }
 
 // ====================================
-// CONVERSION ET FORMATAGE
+// CONVERSION AND FORMATTING
 // ====================================
 
 /**
- * Formate un nombre en devise (USDT)
- * @param {number} value - Valeur à formater
- * @param {number} decimals - Nombre de décimales (défaut: 2)
+ * Formats a number as currency (USDT)
+ * @param {number} value - Value to format
+ * @param {number} decimals - Number of decimals (default: 2)
  * @returns {string}
  */
 function formatCurrency(value, decimals = 2) {
@@ -87,9 +87,9 @@ function formatCurrency(value, decimals = 2) {
 }
 
 /**
- * Formate un pourcentage
- * @param {number} value - Valeur à formater (ex: 0.1234 = 12.34%)
- * @param {number} decimals - Nombre de décimales (défaut: 2)
+ * Formats a percentage
+ * @param {number} value - Value to format (e.g. 0.1234 = 12.34%)
+ * @param {number} decimals - Number of decimals (default: 2)
  * @returns {string}
  */
 function formatPercentage(value, decimals = 2) {
@@ -98,8 +98,8 @@ function formatPercentage(value, decimals = 2) {
 }
 
 /**
- * Formate une date en format lisible
- * @param {string|Date} date - Date à formater
+ * Formats a date in readable format
+ * @param {string|Date} date - Date to format
  * @param {string} format - Format ('short', 'long', 'datetime')
  * @returns {string}
  */
@@ -108,37 +108,37 @@ function formatDate(date, format = 'short') {
     
     switch (format) {
         case 'short':
-            return d.toLocaleDateString('fr-FR');
+            return d.toLocaleDateString('en-US');
         case 'long':
-            return d.toLocaleDateString('fr-FR', { 
+            return d.toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
             });
         case 'datetime':
-            return d.toLocaleString('fr-FR');
+            return d.toLocaleString('en-US');
         default:
-            return d.toLocaleDateString('fr-FR');
+            return d.toLocaleDateString('en-US');
     }
 }
 
 /**
- * Formate un nombre avec séparateurs de milliers
- * @param {number} value - Valeur à formater
- * @param {number} decimals - Nombre de décimales (défaut: 2)
+ * Formats a number with thousand separators
+ * @param {number} value - Value to format
+ * @param {number} decimals - Number of decimals (default: 2)
  * @returns {string}
  */
 function formatNumber(value, decimals = 2) {
     if (isNaN(value)) return '0';
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
     }).format(value);
 }
 
 /**
- * Normalise un symbole crypto (BTC/USDT -> BTCUSDT)
- * @param {string} symbol - Symbole à normaliser
+ * Normalizes a crypto symbol (BTC/USDT -> BTCUSDT)
+ * @param {string} symbol - Symbol to normalize
  * @returns {string}
  */
 function normalizeSymbol(symbol) {
@@ -146,8 +146,8 @@ function normalizeSymbol(symbol) {
 }
 
 /**
- * Convertit un symbole normalisé en format lisible (BTCUSDT -> BTC/USDT)
- * @param {string} symbol - Symbole à convertir
+ * Converts a normalized symbol to readable format (BTCUSDT -> BTC/USDT)
+ * @param {string} symbol - Symbol to convert
  * @returns {string}
  */
 function formatSymbol(symbol) {
@@ -163,26 +163,26 @@ function formatTimeframe(timeframe) {
     if (timeframe.endsWith('m')) {
         timeframe = timeframe.replace('m', ' minutes');
     } else if (timeframe.endsWith('h')) {
-        timeframe = timeframe.replace('h', ' heures');
+        timeframe = timeframe.replace('h', ' hours');
     } else if (timeframe.endsWith('d')) {
-        timeframe = timeframe.replace('d', ' jours');
+        timeframe = timeframe.replace('d', ' days');
     } else if (timeframe.endsWith('w')) {
-        timeframe = timeframe.replace('w', ' semaines');
+        timeframe = timeframe.replace('w', ' weeks');
     } else if (timeframe.endsWith('M')) {
-        timeframe = timeframe.replace('M', ' mois');
+        timeframe = timeframe.replace('M', ' months');
     }
     return timeframe;
 }
 
 // ====================================
-// CALCULS UTILITAIRES
+// UTILITY CALCULATIONS
 // ====================================
 
 /**
- * Calcule le pourcentage de variation
- * @param {number} initialValue - Valeur initiale
- * @param {number} finalValue - Valeur finale
- * @returns {number} Pourcentage de variation (ex: 0.1234 = 12.34%)
+ * Calculates percentage change
+ * @param {number} initialValue - Initial value
+ * @param {number} finalValue - Final value
+ * @returns {number} Percentage change (e.g. 0.1234 = 12.34%)
  */
 function calculatePercentageChange(initialValue, finalValue) {
     if (initialValue === 0) return 0;
@@ -190,11 +190,11 @@ function calculatePercentageChange(initialValue, finalValue) {
 }
 
 /**
- * Calcule le Profit & Loss (PnL)
- * @param {number} entryPrice - Prix d'entrée
- * @param {number} exitPrice - Prix de sortie
- * @param {number} quantity - Quantité tradée
- * @param {number} commission - Commission (défaut: 0.001 = 0.1%)
+ * Calculates Profit & Loss (PnL)
+ * @param {number} entryPrice - Entry price
+ * @param {number} exitPrice - Exit price
+ * @param {number} quantity - Traded quantity
+ * @param {number} commission - Commission (default: 0.001 = 0.1%)
  * @returns {object} {pnl, pnlPercent, fees}
  */
 function calculatePnL(entryPrice, exitPrice, quantity, commission = 0.001) {
@@ -213,12 +213,12 @@ function calculatePnL(entryPrice, exitPrice, quantity, commission = 0.001) {
 }
 
 /**
- * Calcule la position size basée sur le risque
- * @param {number} capital - Capital disponible
- * @param {number} entryPrice - Prix d'entrée
- * @param {number} stopLoss - Prix de stop-loss
- * @param {number} riskPercent - Pourcentage de risque (défaut: 0.02 = 2%)
- * @returns {number} Taille de position
+ * Calculates position size based on risk
+ * @param {number} capital - Available capital
+ * @param {number} entryPrice - Entry price
+ * @param {number} stopLoss - Stop-loss price
+ * @param {number} riskPercent - Risk percentage (default: 0.02 = 2%)
+ * @returns {number} Position size
  */
 function calculatePositionSize(capital, entryPrice, stopLoss, riskPercent = 0.02) {
     const riskAmount = capital * riskPercent;
@@ -230,13 +230,13 @@ function calculatePositionSize(capital, entryPrice, stopLoss, riskPercent = 0.02
 }
 
 // ====================================
-// GESTION DES ERREURS
+// ERROR HANDLING
 // ====================================
 
 /**
- * Affiche un message d'erreur dans l'interface
- * @param {string} message - Message d'erreur
- * @param {string} containerId - ID du conteneur pour l'erreur
+ * Shows an error message in the interface
+ * @param {string} message - Error message
+ * @param {string} containerId - Container ID for the error
  */
 function showError(message, containerId = 'error-container') {
     const container = document.getElementById(containerId);
@@ -253,8 +253,8 @@ function showError(message, containerId = 'error-container') {
 }
 
 /**
- * Cache un message d'erreur
- * @param {string} containerId - ID du conteneur d'erreur
+ * Hides an error message
+ * @param {string} containerId - Error container ID
  */
 function hideError(containerId = 'error-container') {
     const container = document.getElementById(containerId);
@@ -265,9 +265,9 @@ function hideError(containerId = 'error-container') {
 }
 
 /**
- * Affiche un message de succès
- * @param {string} message - Message de succès
- * @param {string} containerId - ID du conteneur pour le succès
+ * Shows a success message
+ * @param {string} message - Success message
+ * @param {string} containerId - Container ID for the success
  */
 function showSuccess(message, containerId = 'success-container') {
     const container = document.getElementById(containerId);
@@ -281,14 +281,14 @@ function showSuccess(message, containerId = 'success-container') {
         `;
         container.style.display = 'block';
         
-        // Auto-hide après 3 secondes
+        // Auto-hide after 3 seconds
         setTimeout(() => hideSuccess(containerId), 3000);
     }
 }
 
 /**
- * Cache un message de succès
- * @param {string} containerId - ID du conteneur de succès
+ * Hides a success message
+ * @param {string} containerId - Success container ID
  */
 function hideSuccess(containerId = 'success-container') {
     const container = document.getElementById(containerId);
@@ -299,15 +299,15 @@ function hideSuccess(containerId = 'success-container') {
 }
 
 // ====================================
-// GESTION DU LOADING
+// LOADING HANDLING
 // ====================================
 
 /**
- * Affiche un indicateur de chargement
- * @param {string} containerId - ID du conteneur
- * @param {string} message - Message de chargement
+ * Shows a loading indicator
+ * @param {string} containerId - Container ID
+ * @param {string} message - Loading message
  */
-function showLoading(containerId, message = 'Chargement...') {
+function showLoading(containerId, message = 'Loading...') {
     const container = document.getElementById(containerId);
     if (container) {
         container.innerHTML = `
@@ -321,8 +321,8 @@ function showLoading(containerId, message = 'Chargement...') {
 }
 
 /**
- * Cache un indicateur de chargement
- * @param {string} containerId - ID du conteneur
+ * Hides a loading indicator
+ * @param {string} containerId - Container ID
  */
 function hideLoading(containerId) {
     const container = document.getElementById(containerId);
@@ -333,11 +333,11 @@ function hideLoading(containerId) {
 }
 
 // ====================================
-// UTILITAIRES DIVERS
+// MISCELLANEOUS UTILITIES
 // ====================================
 
 /**
- * Génère un ID unique
+ * Generates a unique ID
  * @returns {string}
  */
 function generateId() {
@@ -345,22 +345,22 @@ function generateId() {
 }
 
 /**
- * Sauvegarde des données dans localStorage
- * @param {string} key - Clé de sauvegarde
- * @param {any} data - Données à sauvegarder
+ * Saves data to localStorage
+ * @param {string} key - Storage key
+ * @param {any} data - Data to save
  */
 function saveToStorage(key, data) {
     try {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
-        console.error('Erreur sauvegarde localStorage:', error);
+        console.error('Error saving to localStorage:', error);
     }
 }
 
 /**
- * Récupère des données depuis localStorage
- * @param {string} key - Clé de récupération
- * @param {any} defaultValue - Valeur par défaut
+ * Loads data from localStorage
+ * @param {string} key - Storage key
+ * @param {any} defaultValue - Default value
  * @returns {any}
  */
 function loadFromStorage(key, defaultValue = null) {
@@ -368,15 +368,15 @@ function loadFromStorage(key, defaultValue = null) {
         const item = localStorage.getItem(key);
         return item ? JSON.parse(item) : defaultValue;
     } catch (error) {
-        console.error('Erreur lecture localStorage:', error);
+        console.error('Error reading from localStorage:', error);
         return defaultValue;
     }
 }
 
 /**
- * Debounce une fonction
- * @param {Function} func - Fonction à debouncer
- * @param {number} wait - Délai en ms
+ * Debounces a function
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Delay in ms
  * @returns {Function}
  */
 function debounce(func, wait) {
@@ -392,8 +392,8 @@ function debounce(func, wait) {
 }
 
 /**
- * Copie du texte dans le presse-papiers
- * @param {string} text - Texte à copier
+ * Copies text to clipboard
+ * @param {string} text - Text to copy
  * @returns {Promise<boolean>}
  */
 async function copyToClipboard(text) {
@@ -401,16 +401,16 @@ async function copyToClipboard(text) {
         await navigator.clipboard.writeText(text);
         return true;
     } catch (error) {
-        console.error('Erreur copie presse-papiers:', error);
+        console.error('Error copying to clipboard:', error);
         return false;
     }
 }
 
 // ====================================
-// EXPORT DES FONCTIONS
+// EXPORT FUNCTIONS
 // ====================================
 
-// Export pour utilisation dans d'autres fichiers
+// Export for use in other files
 window.Utils = {
     // Validation
     validateAmount,
@@ -421,7 +421,7 @@ window.Utils = {
     validateStrategies,
     validatePercentage,
     
-    // Formatage
+    // Formatting
     formatCurrency,
     formatPercentage,
     formatDate,
@@ -430,7 +430,7 @@ window.Utils = {
     formatSymbol,
     formatTimeframe,
     
-    // Calculs
+    // Calculations
     calculatePercentageChange,
     calculatePnL,
     calculatePositionSize,
@@ -443,7 +443,7 @@ window.Utils = {
     showLoading,
     hideLoading,
     
-    // Utilitaires
+    // Utilities
     generateId,
     saveToStorage,
     loadFromStorage,

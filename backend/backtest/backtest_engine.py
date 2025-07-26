@@ -1,5 +1,5 @@
 """
-Moteur de backtest principal
+Main backtest engine
 """
 
 from typing import Dict
@@ -15,40 +15,40 @@ from ..strategies.DCA_strategy import DCA_strategy
 logger = logging.getLogger(__name__)
 
 class BacktestEngine:
-    """Moteur principal pour exécuter les backtests"""
+    """Main engine to run backtests"""
 
-    def __init__(self, initial_capital: float = 10000, commission_rate: float = 0.001, timeframe: str = '1h', paires: list = []):
-        self.portfolio = Portfolio(initial_capital, commission_rate, paires)
+    def __init__(self, initial_capital: float = 10000, commission_rate: float = 0.001, timeframe: str = '1h', pairs: list = []):
+        self.portfolio = Portfolio(initial_capital, commission_rate, pairs)
         self.strategy = None
         self.timeframe = pd.to_timedelta(timeframe)
 
-        logger.info("Moteur de backtest initialisé")
+        logger.info("Backtest engine initialized")
 
     def set_strategy(self, strategy_params, strategy_class: str):
-        """Configure la stratégie de trading"""
+        """Set the trading strategy"""
         self.strategy = globals()[strategy_class]()
         self.strategy.set_params(strategy_params)
 
     def run_backtest(self, market_data: Dict[str, pd.DataFrame]) -> Dict:
-        """Exécute un backtest complet"""
+        """Run a complete backtest"""
         if self.strategy is None:
-            raise ValueError("Aucune stratégie configurée")
+            raise ValueError("No strategy configured")
         
-        logger.info("Début du backtest")
+        logger.info("Backtest started")
         self.portfolio.set_market_data(market_data)
         
-        # Génération des trades
+        # Generate trades
         signals = {symbol: self.strategy.generate_signals(data) for symbol, data in market_data.items()}
         for symbol, signal_df in signals.items():
             signal_df['symbol'] = symbol
         
-        # Fusion des signaux en un seul DataFrame
+        # Merge signals into a single DataFrame
         signals_df = pd.concat(signals.values(), ignore_index=False)
         print(signals_df)
 
-        logger.info(f"{len(signals_df)} signaux générés")
+        logger.info(f"{len(signals_df)} signals generated")
 
-        # Exécution des trades
+        # Execute trades
         start_ts = min(market_data[symbol].index.min() for symbol in market_data)
         end_ts = max(market_data[symbol].index.max() for symbol in market_data)
         
@@ -64,19 +64,18 @@ class BacktestEngine:
                 }
                 self.portfolio.execute_trade(trade)
             
-        logger.info(f"{len(self.portfolio.trades)} trades exécutés")
+        logger.info(f"{len(self.portfolio.trades)} trades executed")
 
-        # Conversion des DataFrames en dictionnaires pour la sérialisation JSON
+        # Convert DataFrames to dicts for JSON serialization
         graph_data = self.portfolio.graph_data
         trades_history = self.portfolio.trades
         
-        # Résultats finaux avec conversion JSON
+        # Final results with JSON conversion
         results = {
             'portfolio_summary': self.portfolio.get_summary(),
             'trades_history': trades_history if trades_history else [],
             'graph_data': graph_data if graph_data else {},
         }
 
-
-        logger.info("Backtest terminé")
+        logger.info("Backtest finished")
         return results

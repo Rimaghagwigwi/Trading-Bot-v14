@@ -24,14 +24,14 @@
 }
 
 
-/* Styles pour les graphiques TradingView */
+/* TradingView chart styles */
 
-/* Section des graphiques */
+/* Charts section */
 #backtest-charts {
     margin: 2rem 0;
 }
 
-/* Graphique individuel */
+/* Individual chart */
 .chart {
     background: var(--card-background);
     border-radius: 0.75rem;
@@ -46,7 +46,7 @@
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
 }
 
-/* Titre du graphique */
+/* Chart title */
 .chart-title {
     padding: 1rem;
     background: var(--secondary-color);
@@ -64,7 +64,7 @@
     font-size: 1.1rem;
 }
 
-/* Conteneur du graphique TradingView */
+/* TradingView chart container */
 .chart-container {
     height: 400px !important;
     width: 100% !important;
@@ -74,7 +74,7 @@
     background: var(--background-dark);
 }
 
-/* Contrôles du graphique */
+/* Chart controls */
 .chart-controls {
     position: absolute;
     top: 10px;
@@ -120,7 +120,7 @@
     font-size: 0.8rem;
 }
 
-/* Message d'erreur */
+/* Error message */
 .chart-error {
     padding: 2rem;
     text-align: center;
@@ -185,7 +185,7 @@
     }
 }
 
-/* Animation d'apparition */
+/* Fade-in animation */
 .chart {
     animation: fadeInUp 0.5s ease-out;
 }
@@ -201,7 +201,7 @@
     }
 }
 
-/* États de chargement */
+/* Loading states */
 .chart.loading {
     opacity: 0.7;
     pointer-events: none;

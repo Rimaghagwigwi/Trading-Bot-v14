@@ -1,6 +1,6 @@
 /**
- * Gestion de l'interface Backtest
- * Gère la configuration, l'exécution et l'affichage des résultats de backtest
+ * Backtest Interface Management
+ * Handles configuration, execution, and display of backtest results
  */
 
 class BacktestManager {
@@ -12,57 +12,57 @@ class BacktestManager {
     }
     
     /**
-     * Initialisation du gestionnaire backtest
+     * Initialization of the backtest manager
      */
     async init() {
 
-        console.log('🚀 Initialisation du BacktestManager...');
+        console.log('🚀 Initializing BacktestManager...');
         
-        // Récupération des symboles disponibles
+        // Fetch available symbols
         try {
             const response = await window.API.config.getSymbols();
-            console.log('Symboles récupérés:', response.data.symbols);
+            console.log('Symbols fetched:', response.data.symbols);
             this.populateSymbolCheckboxes(response.data.symbols);
         } catch (error) {
-            console.warn('⚠️ Impossible de récupérer les symboles:', error);
+            console.warn('⚠️ Unable to fetch symbols:', error);
         }
         
-        // Récupération des timeframes disponibles
+        // Fetch available timeframes
         try {
             const response = await window.API.config.getTimeframes();
-            console.log('Timeframes récupérés:', response.data.timeframes);
+            console.log('Timeframes fetched:', response.data.timeframes);
             this.populateTimeframeSelect(response.data.timeframes);
         } catch (error) {
-            console.warn('⚠️ Impossible de récupérer les timeframes:', error);
+            console.warn('⚠️ Unable to fetch timeframes:', error);
         }
         
-        // Récupération des stratégies disponibles
+        // Fetch available strategies
         try {
             const response = await window.API.config.getStrategies();
             this.strategies = response.data.strategies || [];
-            console.log('Stratégies récupérées:', this.strategies);
+            console.log('Strategies fetched:', this.strategies);
             this.populateStrategySelect(this.strategies);
         } catch (error) {
-            console.warn('⚠️ Impossible de récupérer les stratégies:', error);
+            console.warn('⚠️ Unable to fetch strategies:', error);
         }
         
-        // Récupération de la configuration par défaut
+        // Fetch default configuration
         try {
             const config = await window.API.config.getDefaults();
-            console.log('Configuration par défaut récupérée:', config);
+            console.log('Default configuration fetched:', config);
             this.applyDefaultConfig(config.data);
         } catch (error) {
-            console.warn('⚠️ Impossible de récupérer la configuration par défaut:', error);
+            console.warn('⚠️ Unable to fetch default configuration:', error);
         }
 
-        console.log('✅ BacktestManager initialisé avec succès');
+        console.log('✅ BacktestManager initialized successfully');
     }
 
-    // Peuple la selection des symboles
+    // Populate symbol selection
     populateSymbolCheckboxes(symbols) {
         const grid = document.getElementById('trading-pairs-grid');
         if (!grid || !symbols) {
-            console.warn('⚠️ Impossible de peupler la sélection des symboles : élément ou données manquantes');
+            console.warn('⚠️ Unable to populate symbol selection: missing element or data');
             return;
         }
         grid.innerHTML = '';
@@ -82,7 +82,7 @@ class BacktestManager {
         });
     }
 
-    // Peuple le select des timeframes
+    // Populate timeframe select
     populateTimeframeSelect(timeframes) {
         const timeframeSelect = document.getElementById('timeframe');
         if (!timeframeSelect || !timeframes) return;
@@ -96,7 +96,7 @@ class BacktestManager {
         });
     }
 
-    // Peuple le select des stratégies
+    // Populate strategy select
     populateStrategySelect(strategies) {
         const strategySelect = document.getElementById('strategy');
         if (!strategySelect || !strategies) return;
@@ -112,14 +112,14 @@ class BacktestManager {
         this.setupStrategyChangeListener();
     }
 
-    // Peuple les selects des paramètres de stratégie
+    // Populate strategy parameter selects
     populateStrategyParams(strategy_name) {
         const paramsContainer = document.getElementById('strategy-params-grid');
         if (!paramsContainer) return;
         
         const strategy = this.strategies.find(s => s.name === strategy_name);
         const params = strategy ? strategy.parameters : null;
-        console.log('Paramètres récupérés:', params);
+        console.log('Parameters fetched:', params);
 
         if (!params || Object.keys(params).length === 0) {
             return;
@@ -142,14 +142,14 @@ class BacktestManager {
         const strategySelect = document.getElementById('strategy');
         if (!strategySelect) return;
         
-        // Ajouter le nouvel event listener
+        // Add new event listener
         strategySelect.addEventListener('change', (event) => {
             this.populateStrategyParams(event.target.value);
         });
     }
 
     
-    // Applique la configuration par défaut
+    // Apply default configuration
     applyDefaultConfig(config) {
         if (!config) return;
         const timeframeSelect = document.getElementById('timeframe');   
@@ -170,7 +170,7 @@ class BacktestManager {
             initialCapitalInput.value = config.initial_capital;
         }
         if (commissionInput && config.commission_rate) {
-            commissionInput.value = config.commission_rate * 100; // Convertit en pourcentage
+            commissionInput.value = config.commission_rate * 100; // Convert to percentage
         }
         if (startDate && endDate && config.days) {
             const start = new Date();
@@ -178,13 +178,13 @@ class BacktestManager {
             const end = new Date();
             const startValue = start.toISOString().split('T')[0];
             const endValue = end.toISOString().split('T')[0];
-            console.log(`Dates par défaut appliquées: ${startValue} → ${endValue}`);
+            console.log(`Default dates applied: ${startValue} → ${endValue}`);
             startDate.value = startValue;
             endDate.value = endValue;
         }
     }
 
-    //Récupère la configuration du backtest
+    // Get backtest configuration
     getBacktestConfig() {
         const symbols = Array.from(document.querySelectorAll('input[name="trading-pairs"]:checked')).map(input => input.value);
         const timeframe = document.getElementById('timeframe').value;
@@ -206,43 +206,43 @@ class BacktestManager {
             'initial_capital': initial_capital,
             'start_date': new Date(start_date),
             'end_date': new Date(end_date),
-            'commission_rate': commission / 100 // Convertit en pourcentage
+            'commission_rate': commission / 100 // Convert to percentage
         };
     }
 
     getStrategyParams(strategy_name) {
         const strategy = this.strategies.find(s => s.name === strategy_name);
-        console.log('Stratégie trouvée:', strategy);
+        console.log('Strategy found:', strategy);
         if (!strategy || !strategy.parameters) {
-            console.warn('⚠️ Aucune stratégie ou paramètres trouvés pour:', strategy_name);
+            console.warn('⚠️ No strategy or parameters found for:', strategy_name);
             return {};
         }
         const params = {};
-        // Récupération des valeurs des paramètres
+        // Get parameter values
         Object.entries(strategy.parameters).forEach(([key, param]) => {
             const value = document.getElementById(key).value;
-            params[key] = parseFloat(value) || param.default; // Utilise la valeur par défaut si la saisie est invalide
+            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
         });
 
         return params;
     }
 
-    //Démarre le backtest
+    // Start backtest
     startBacktest() {
         this.isRunning = true;
-        console.log('✅ Démarrage du backtest...');
-        // Logique pour démarrer le backtest
+        console.log('✅ Starting backtest...');
+        // Logic to start backtest
         const config = this.getBacktestConfig();
         if (!config.symbols || !config.timeframe || !config.strategy) {
-            console.error('❌ Configuration du backtest manquante.');
+            console.error('❌ Missing backtest configuration.');
             this.isRunning = false;
             return;
         }
-        console.log('🔧 Configuration du backtest:', config)
+        console.log('🔧 Backtest configuration:', config)
         window.API.backtest.run(config)
             .then(response => {
                 if (!response.success) {
-                    console.error('❌ Erreur dans la réponse du backtest:', response);
+                    console.error('❌ Error in backtest response:', response);
                 } else {
                     this.backtestHistory.push(response.data);
                     this.displayResults(response.data);
@@ -250,159 +250,159 @@ class BacktestManager {
                 this.isRunning = false;
             })
             .catch(error => {
-                console.error('❌ Erreur lors du backtest:', error);
+                console.error('❌ Error during backtest:', error);
                 this.isRunning = false;
             });
     }
 
     /**
-     * Affiche les résultats du backtest dans l'interface
-     * @param {Object} data - Données de la réponse de l'API
+     * Display backtest results in the interface
+     * @param {Object} data - API response data
      */
     displayResults(data) {
-        console.log('📊 Affichage des résultats du backtest:', data);
+        console.log('📊 Displaying backtest results:', data);
 
-        // Afficher la section des résultats
+        // Show results section
         const resultsSection = document.getElementById('backtest-results');
         resultsSection.style.display = 'block';
 
-        // 1. Afficher les métriques de performance
+        // 1. Display performance metrics
         this.displayMetrics(data.metrics);
 
-        // 2. Créer le graphique
+        // 2. Create chart
         this.displayChart(data.results, data.market_data);
 
-        // 3. Ajouter à l'historique des backtests
+        // 3. Add to backtest history
         this.addToBacktestHistory(data.parameters, data.results, data.metrics);
 
-        // 4. Faire défiler vers les résultats
+        // 4. Scroll to results
         resultsSection.scrollIntoView({ behavior: 'smooth' });
 
-        // 5. Afficher un message de succès
-        window.Utils.showSuccess('Backtest terminé avec succès !');
+        // 5. Show success message
+        window.Utils.showSuccess('Backtest completed successfully!');
 
     }
 
     /**
-     * Affiche les métriques de performance
-     * @param {Object} metrics - Métriques calculées
+     * Display performance metrics
+     * @param {Object} metrics - Calculated metrics
      */
     displayMetrics(metrics) {
         try {
             const grid = document.getElementById('metrics-cards-grid');
             if (!grid) return;
 
-            grid.innerHTML = ''; // Réinitialiser le contenu
+            grid.innerHTML = ''; // Reset content
 
-            // Créer les éléments de métriques
+            // Create metric cards
             const METRICS_CARDS = {
-                'Rendement': [
-                    { id: 'total-return', label: 'Rendement total', value: metrics['return_metrics']['total_return_pct'].toFixed(2) + '%'},
-                    { id: 'annualized-return', label: 'Rendement annualisé', value: metrics['return_metrics']['annualized_return_pct'].toFixed(2) + '%'}
+                'Return': [
+                    { id: 'total-return', label: 'Total Return', value: metrics['return_metrics']['total_return_pct'].toFixed(2) + '%'},
+                    { id: 'annualized-return', label: 'Annualized Return', value: metrics['return_metrics']['annualized_return_pct'].toFixed(2) + '%'}
                 ],
-                'Comparaison avec Buy and Hold': [
-                    { id: 'benchmark-return', label: 'Rendement du benchmark', value: metrics['benchmark_metrics']['benchmark_return_pct'].toFixed(2) + '%'},
-                    { id: 'outperformance', label: 'Surperformance', value: metrics['benchmark_metrics']['excess_return_pct'].toFixed(2) + '%'}
+                'Comparison with Buy and Hold': [
+                    { id: 'benchmark-return', label: 'Benchmark Return', value: metrics['benchmark_metrics']['benchmark_return_pct'].toFixed(2) + '%'},
+                    { id: 'outperformance', label: 'Outperformance', value: metrics['benchmark_metrics']['excess_return_pct'].toFixed(2) + '%'}
                 ],
-                'Risque': [
-                    { id: 'sharpe-ratio', label: 'Ratio de Sharpe', value: metrics['risk_metrics']['sharpe_ratio'].toFixed(2)},
-                    { id: 'sortino-ratio', label: 'Ratio de Sortino', value: metrics['risk_metrics']['sortino_ratio'].toFixed(2)},
-                    { id: 'max-drawdown', label: 'Drawdown maximum', value: metrics['risk_metrics']['max_drawdown_pct'].toFixed(2) + '%'},
-                    { id: 'volatility', label: 'Volatilité', value: metrics['risk_metrics']['volatility_pct'].toFixed(2) + '%'}
+                'Risk': [
+                    { id: 'sharpe-ratio', label: 'Sharpe Ratio', value: metrics['risk_metrics']['sharpe_ratio'].toFixed(2)},
+                    { id: 'sortino-ratio', label: 'Sortino Ratio', value: metrics['risk_metrics']['sortino_ratio'].toFixed(2)},
+                    { id: 'max-drawdown', label: 'Max Drawdown', value: metrics['risk_metrics']['max_drawdown_pct'].toFixed(2) + '%'},
+                    { id: 'volatility', label: 'Volatility', value: metrics['risk_metrics']['volatility_pct'].toFixed(2) + '%'}
                 ],
                 'Trade': [
-                    { id: 'total_trades', label: 'Total des trades', value: metrics['trade_metrics']['total_trades']},
-                    { id: 'win-rate', label: 'Taux de victoire', value: metrics['trade_metrics']['win_rate_pct'].toFixed(2) + '%'},
+                    { id: 'total_trades', label: 'Total Trades', value: metrics['trade_metrics']['total_trades']},
+                    { id: 'win-rate', label: 'Win Rate', value: metrics['trade_metrics']['win_rate_pct'].toFixed(2) + '%'},
                 ]
             };
             
-            // Fonction pour déterminer la couleur basée sur la valeur
+            // Function to determine color based on value
             function getColorClass(value, metricId) {
-            // Définition des seuils pour chaque métrique
-            const thresholds = {
-                'total-return': { win: 10, neutral: 0 },           // > 10% = win, 0-10% = neutral, < 0% = loss
-                'annualized-return': { win: 15, neutral: 0 },      // > 15% = win
-                'benchmark-return': { win: 8, neutral: 0 },        // > 8% = win
-                'outperformance': { win: 5, neutral: 0 },          // > 5% = win
-                'sharpe-ratio': { win: 1.5, neutral: 1 },          // > 1.5 = win, 1-1.5 = neutral, < 1 = loss
-                'sortino-ratio': { win: 2, neutral: 1 },           // > 2 = win
-                'max-drawdown': { win: -5, neutral: -10 },         // > -5% = win, -5% à -10% = neutral, < -10% = loss
-                'volatility': { win: 15, neutral: 25 },            // < 15% = win, 15-25% = neutral, > 25% = loss
-                'win-rate': { win: 60, neutral: 50 }               // > 60% = win, 50-60% = neutral, < 50% = loss
-            };
-            
-            // Cas neutres (pas de coloration)
-            const neutralMetrics = ['total_trades'];
-            
-            if (neutralMetrics.includes(metricId)) {
-                return '';
-            }
-            
-            const threshold = thresholds[metricId];
-            if (!threshold) {
-                return ''; // Pas de seuil défini
-            }
-            
-            const numericValue = parseFloat(value.replace('%', ''));
-            
-            // Métriques où plus bas = mieux
-            const lowerIsBetter = ['max-drawdown', 'volatility'];
-            
-            if (lowerIsBetter.includes(metricId)) {
-                if (numericValue <= threshold.win) return 'win-color';
-                if (numericValue <= threshold.neutral) return 'neutral-color';
-                return 'loss-color';
-            } else {
-                if (numericValue >= threshold.win) return 'win-color';
-                if (numericValue >= threshold.neutral) return 'neutral-color';
-                return 'loss-color';
-            }
-        }
-
-
-            //Creation des cartes de métriques
-            Object.entries(METRICS_CARDS).forEach(([categoryTitle, metrics]) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            const header = document.createElement('div');
-            header.className = 'card-header';
-            header.textContent = categoryTitle;
-            card.appendChild(header);
-            
-            const cardBody = document.createElement('div');
-            cardBody.className = 'card-body';
-
-            metrics.forEach(metric => {
-                const metricElement = document.createElement('div');
-                metricElement.className = 'metric-item';
+                // Thresholds for each metric
+                const thresholds = {
+                    'total-return': { win: 10, neutral: 0 },           // > 10% = win, 0-10% = neutral, < 0% = loss
+                    'annualized-return': { win: 15, neutral: 0 },      // > 15% = win
+                    'benchmark-return': { win: 8, neutral: 0 },        // > 8% = win
+                    'outperformance': { win: 5, neutral: 0 },          // > 5% = win
+                    'sharpe-ratio': { win: 1.5, neutral: 1 },          // > 1.5 = win, 1-1.5 = neutral, < 1 = loss
+                    'sortino-ratio': { win: 2, neutral: 1 },           // > 2 = win
+                    'max-drawdown': { win: -5, neutral: -10 },         // > -5% = win, -5% to -10% = neutral, < -10% = loss
+                    'volatility': { win: 15, neutral: 25 },            // < 15% = win, 15-25% = neutral, > 25% = loss
+                    'win-rate': { win: 60, neutral: 50 }               // > 60% = win, 50-60% = neutral, < 50% = loss
+                };
                 
-                const label = document.createElement('span');
-                label.className = 'metric-label';
-                label.textContent = metric.label;
+                // Neutral metrics (no coloring)
+                const neutralMetrics = ['total_trades'];
                 
-                const value = document.createElement('span');
-                value.className = 'metric-value';
-                value.id = metric.id;
-                value.textContent = metric.value;
-                
-                metricElement.appendChild(label);
-                metricElement.appendChild(value);
-                cardBody.appendChild(metricElement);
-
-                // Appliquer la couleur selon la valeur
-                const colorClass = getColorClass(metric.value, metric.id);
-                if (colorClass) {
-                    value.classList.add(colorClass);
+                if (neutralMetrics.includes(metricId)) {
+                    return '';
                 }
+                
+                const threshold = thresholds[metricId];
+                if (!threshold) {
+                    return ''; // No threshold defined
+                }
+                
+                const numericValue = parseFloat(value.replace('%', ''));
+                
+                // Metrics where lower is better
+                const lowerIsBetter = ['max-drawdown', 'volatility'];
+                
+                if (lowerIsBetter.includes(metricId)) {
+                    if (numericValue <= threshold.win) return 'win-color';
+                    if (numericValue <= threshold.neutral) return 'neutral-color';
+                    return 'loss-color';
+                } else {
+                    if (numericValue >= threshold.win) return 'win-color';
+                    if (numericValue >= threshold.neutral) return 'neutral-color';
+                    return 'loss-color';
+                }
+            }
+
+
+            //Create metric cards
+            Object.entries(METRICS_CARDS).forEach(([categoryTitle, metrics]) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const header = document.createElement('div');
+                header.className = 'card-header';
+                header.textContent = categoryTitle;
+                card.appendChild(header);
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                metrics.forEach(metric => {
+                    const metricElement = document.createElement('div');
+                    metricElement.className = 'metric-item';
+                    
+                    const label = document.createElement('span');
+                    label.className = 'metric-label';
+                    label.textContent = metric.label;
+                    
+                    const value = document.createElement('span');
+                    value.className = 'metric-value';
+                    value.id = metric.id;
+                    value.textContent = metric.value;
+                    
+                    metricElement.appendChild(label);
+                    metricElement.appendChild(value);
+                    cardBody.appendChild(metricElement);
+
+                    // Apply color based on value
+                    const colorClass = getColorClass(metric.value, metric.id);
+                    if (colorClass) {
+                        value.classList.add(colorClass);
+                    }
+                });
+
+                card.appendChild(cardBody);
+                grid.appendChild(card);
             });
 
-            card.appendChild(cardBody);
-            grid.appendChild(card);
-        });
-
         } catch (error) {
-            console.error('Erreur lors de l\'affichage des métriques:', error);
+            console.error('Error displaying metrics:', error);
         }
     }
 
@@ -411,36 +411,36 @@ class BacktestManager {
         sectionID.style.display = 'block';
 
         console.log(results)
-        // Réinitialiser le conteneur des graphiques
+        // Reset charts container
         const chartsContainer = document.getElementById('backtest-charts-container');
         chartsContainer.innerHTML = `<div class="chart" id="comparison-chart"></div>`;
 
-        // Graphique de comparaison
-        chartManager.createComparisonChart('comparison-chart', 'Résultats backtest', results.graph_data);
+        // Comparison chart
+        chartManager.createComparisonChart('comparison-chart', 'Backtest Results', results.graph_data);
 
-        // Graphique de chaque crypto
+        // Chart for each crypto
         Object.entries(market_data).forEach(([symbol, data]) => {
-            // resultats.trades_history = [{symbol: 'BTCUSDC', entry: 100, exit: 110, ...}, ...]
+            // results.trades_history = [{symbol: 'BTCUSDC', entry: 100, exit: 110, ...}, ...]
             chartManager.createCandlestickChart(`${symbol}-candle-chart`, `${symbol}`, data);
             chartManager.addSignalsToChart(`${symbol}-candle-chart`, results.trades_history.filter(trade => trade.symbol === symbol));
         });
     }
 
     /**
-     * Ajoute les résultats à l'historique des backtests
-     * @param {Object} results - Résultats du backtest
+     * Add results to backtest history
+     * @param {Object} results - Backtest results
      */
     addToBacktestHistory(params, results, metrics) {
         const historyTable = document.getElementById('backtest-history').getElementsByTagName('tbody')[0];
-        const newRow = historyTable.insertRow(0); // Insérer en première position
+        const newRow = historyTable.insertRow(0); // Insert at first position
 
-        // Formatage des données
-        const currentDate = new Date().toLocaleString('fr-FR');
+        // Format data
+        const currentDate = new Date().toLocaleString('en-US');
         const period = `${params.start_date.split('T')[0]} → ${params.end_date.split('T')[0]}`;
         const returnValue = metrics.return_metrics.total_return_pct.toFixed(2);
         const sharpeValue = metrics.risk_metrics.sharpe_ratio?.toFixed(2) || 'N/A';
 
-        // Création des cellules
+        // Create cells
         newRow.innerHTML = `
             <td>${currentDate}</td>
             <td>${params.symbols}</td>
@@ -450,59 +450,59 @@ class BacktestManager {
             <td class="${sharpeValue >= 1 ? 'positive' : sharpeValue >= 0 ? 'neutral' : 'negative'}">${sharpeValue}</td>
         `;
 
-        // Limiter l'historique à 10 entrées
+        // Limit history to 10 entries
         while (historyTable.rows.length > 10) {
             historyTable.deleteRow(historyTable.rows.length - 1);
         }
     }
 
     /**
-     * Exporte les résultats en CSV
-     * @param {string} symbol - Symbole de la crypto
-     * @param {string} strategy - Nom de la stratégie
+     * Export results to CSV
+     * @param {string} symbol - Crypto symbol
+     * @param {string} strategy - Strategy name
      */
     exportResults(symbol, strategy) {
         try {
-            // Cette fonction devrait être appelée avec les résultats actuels
-            // Pour l'instant, on affiche juste un message
-            window.Utils.showSuccess(`Export des résultats pour ${symbol} - ${strategy} (à implémenter)`);
+            // This function should be called with current results
+            // For now, just show a message
+            window.Utils.showSuccess(`Exporting results for ${symbol} - ${strategy} (to be implemented)`);
         } catch (error) {
-            console.error('Erreur lors de l\'export:', error);
-            window.Utils.showError('Erreur lors de l\'export des résultats');
+            console.error('Error during export:', error);
+            window.Utils.showError('Error exporting results');
         }
     }
 
-    // Fonction utilitaire pour formater les pourcentages
+    // Utility function to format percentages
     formatPercentage(value, decimals = 2) {
         return (value * 100).toFixed(decimals) + '%';
     }
 
-    // Fonction utilitaire pour formater les devises
+    // Utility function to format currency
     formatCurrency(value, currency = 'USDT', decimals = 2) {
         return value.toFixed(decimals) + ' ' + currency;
     }
 }
 
-// Instance globale
+// Global instance
 window.BacktestManager = new BacktestManager();
 
-// Écouteur pour le bouton de lancement du backtest
+// Listener for backtest run button
 document.getElementById('run-backtest').addEventListener('click', async () => {
     if (window.BacktestManager.isRunning) { 
-        alert('Un backtest est déjà en cours.');
+        alert('A backtest is already running.');
         return;
     }   
 
-    // Démarrer le backtest
+    // Start backtest
     window.BacktestManager.startBacktest();
 });
 
-// Auto-initialisation au chargement de la page
+// Auto-initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     window.BacktestManager.init();
 });
 
-// Export pour utilisation avec modules
+// Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = BacktestManager;
 }

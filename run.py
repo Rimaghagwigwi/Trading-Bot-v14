@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de lancement du Bot de Trading Crypto
+Crypto Trading Bot Launch Script
 """
 
 import os
@@ -8,17 +8,17 @@ import sys
 from backend.app import create_app
 
 def main():
-    """Point d'entrée principal"""
-    # Création de l'application Flask
+    """Main entry point"""
+    # Create the Flask application
     app = create_app()
     
-    # Configuration pour le développement local
+    # Local development configuration
     if __name__ == "__main__":
-        print("🚀 Lancement du Bot de Trading Crypto...")
-        print("📊 Interface backtest disponible sur: http://localhost:5000")
-        print("⚠️  Mode développement - Usage local uniquement")
+        print("🚀 Launching the Crypto Trading Bot...")
+        print("📊 Backtest interface available at: http://localhost:5000")
+        print("⚠️  Development mode - Local use only")
         
-        # Lancement du serveur Flask
+        # Start the Flask server
         app.run(
             host='0.0.0.0',
             port=5000,

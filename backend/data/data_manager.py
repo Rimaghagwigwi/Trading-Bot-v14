@@ -5,48 +5,48 @@ import requests
 
 class DataManager:
     """
-    Gestionnaire des données historiques avec stockage CSV.
-    Récupère les données depuis Binance et les stocke localement.
+    Historical data manager with CSV storage.
+    Retrieves data from Binance and stores it locally.
     """
     
     def __init__(self):
         self.data_dir = "backend/data/historical"
-        # Créer le dossier de données s'il n'existe pas
+        # Create the data directory if it doesn't exist
         os.makedirs(self.data_dir, exist_ok=True)
 
     def get_historical_data(self, symbol: str, start_date: pd.Timestamp, end_date: pd.Timestamp, timeframe: str) -> pd.DataFrame:
         """
-        Récupère les données historiques OHLCV pour un symbol et timeframe donné.
+        Retrieves historical OHLCV data for a given symbol and timeframe.
         
         Args:
-            symbol: Symbole de trading (ex: "BTCUSDT")
-            start_date: Date de début
-            end_date: Date de fin
-            timeframe: Intervalle de temps (ex: "1m", "5m", "1h", etc.)
+            symbol: Trading symbol (e.g., "BTCUSDT")
+            start_date: Start date
+            end_date: End date
+            timeframe: Time interval (e.g., "1m", "5m", "1h", etc.)
             
         Returns:
-            DataFrame avec colonnes: timestamp, open, high, low, close, volume
+            DataFrame with columns: timestamp, open, high, low, close, volume
         """
         
         filename = f"{symbol}_{timeframe}.csv"
         filepath = os.path.join(self.data_dir, filename)
         
-        # Normaliser les dates d'entrée (enlever timezone si présente)
+        # Normalize input dates (remove timezone if present)
         start_date = start_date.tz_localize(None) if start_date.tz is not None else start_date
         end_date = end_date.tz_localize(None) if end_date.tz is not None else end_date
         
-        # Charger les données existantes ou créer un DataFrame vide
+        # Load existing data or create an empty DataFrame
         if os.path.exists(filepath):
             df = pd.read_csv(filepath)
-            df['timestamp'] = pd.to_datetime(df['timestamp']).dt.tz_localize(None)  # Enlever timezone
+            df['timestamp'] = pd.to_datetime(df['timestamp']).dt.tz_localize(None)  # Remove timezone
             df = df.sort_values('timestamp')
         else:
             df = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         
-        # Vérifier si on a besoin de récupérer des données manquantes
+        # Check if we need to fetch missing data
         missing_ranges = self._find_missing_ranges(df, start_date, end_date, timeframe)
         
-        # Récupérer les données manquantes depuis Binance
+        # Fetch missing data from Binance
         for range_start, range_end in missing_ranges:
             new_data = self._fetch_from_binance(symbol, range_start, range_end, timeframe)
             print("New data fetched:", new_data)
@@ -54,37 +54,37 @@ class DataManager:
                 df = pd.concat([df, new_data], ignore_index=True)
                 print("Data concatenated:", df)
             else:
-                raise ValueError(f"Aucune donnée récupérée pour {symbol} de {range_start} à {range_end}")
+                raise ValueError(f"No data retrieved for {symbol} from {range_start} to {range_end}")
 
-        # Nettoyer et sauvegarder
+        # Clean and save
         if not df.empty:
             df = df.drop_duplicates(subset=['timestamp']).sort_values('timestamp')
             df.to_csv(filepath, index=False)
         
-        # Retourner uniquement les données dans la plage demandée
+        # Return only the data within the requested range
         return df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)].copy()
 
     def _find_missing_ranges(self, df: pd.DataFrame, start_date: pd.Timestamp, end_date: pd.Timestamp, timeframe: str) -> list:
-        """Trouve les plages de données manquantes."""
+        """Finds missing data ranges."""
         missing_ranges = []
         
         if df.empty:
             return [(start_date, end_date)]
         
-        # Vérifier avant le premier timestamp
+        # Check before the first timestamp
         first_ts = df['timestamp'].min()
         if start_date < first_ts:
-            # Calculer correctement la fin de la plage manquante
+            # Correctly calculate the end of the missing range
             timeframe_delta = pd.Timedelta(timeframe)
             missing_ranges.append((start_date, first_ts - timeframe_delta))
         
-        # Vérifier après le dernier timestamp
+        # Check after the last timestamp
         last_ts = df['timestamp'].max()
         if end_date > last_ts:
             timeframe_delta = pd.Timedelta(timeframe)
             missing_ranges.append((last_ts + timeframe_delta, end_date))
         
-        # Vérifier les trous dans les données
+        # Check for gaps in the data
         df_in_range = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
         if len(df_in_range) > 1:
             expected_timestamps = pd.date_range(start=df_in_range['timestamp'].min(), 
@@ -103,17 +103,17 @@ class DataManager:
                         missing_ranges.append((gap_start, ts - timeframe_delta))
                         gap_start = None
             
-            # Gérer un trou qui va jusqu'à la fin
+            # Handle a gap that goes to the end
             if gap_start is not None:
                 missing_ranges.append((gap_start, df_in_range['timestamp'].max()))
         
         return missing_ranges
 
     def _fetch_from_binance(self, symbol: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str) -> pd.DataFrame:
-        """Récupère les données depuis l'API Binance."""
+        """Fetches data from the Binance API."""
         base_url = "https://api.binance.com/api/v3/klines"
         
-        print(f"Récupération des données de {symbol} de {start_date} à {end_date} avec intervalle {interval}")
+        print(f"Fetching data for {symbol} from {start_date} to {end_date} with interval {interval}")
         start_ms = int(start_date.timestamp() * 1000)
         end_ms = int(end_date.timestamp() * 1000)
 
@@ -140,7 +140,7 @@ class DataManager:
                 
                 for kline in data:
                     all_data.append({
-                        'timestamp': pd.to_datetime(kline[0], unit='ms').tz_localize(None),  # Enlever timezone
+                        'timestamp': pd.to_datetime(kline[0], unit='ms').tz_localize(None),  # Remove timezone
                         'open': float(kline[1]),
                         'high': float(kline[2]),
                         'low': float(kline[3]),
@@ -148,13 +148,13 @@ class DataManager:
                         'volume': float(kline[5])
                     })
                 
-                # Mettre à jour le timestamp de départ pour la prochaine requête
+                # Update the start timestamp for the next request
                 start_ms = data[-1][0] + 1
                 
                 if start_ms < end_ms:
                     time.sleep(1)
             except requests.exceptions.RequestException as e:
-                print(f"Erreur lors de la récupération des données: {e}")
+                print(f"Error while fetching data: {e}")
                 break
 
         return pd.DataFrame(all_data)

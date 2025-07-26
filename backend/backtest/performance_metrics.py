@@ -1,5 +1,5 @@
 """
-Calcul des métriques de performance pour les backtests
+Performance metrics calculation for backtests
 """
 
 import pandas as pd
@@ -7,7 +7,7 @@ import numpy as np
 from typing import Dict, List
 
 class PerformanceMetrics:
-    """Calculateur de métriques de performance"""
+    """Performance metrics calculator"""
     
     def __init__(self, results: Dict, market_data: pd.DataFrame):
         self.portfolio_summary = results['portfolio_summary']
@@ -16,7 +16,7 @@ class PerformanceMetrics:
         self.market_data = market_data
         
     def calculate_all_metrics(self) -> Dict:
-        """Calcule toutes les métriques de performance"""
+        """Calculates all performance metrics"""
         self.risk_metrics = self._calculate_risk_metrics()
         self.return_metrics = self._calculate_return_metrics()
         self.trade_metrics = self._calculate_trade_metrics()
@@ -29,12 +29,12 @@ class PerformanceMetrics:
         }
     
     def _calculate_return_metrics(self) -> Dict:
-        """Calcule les métriques de rendement"""
+        """Calculates return metrics"""
         initial = self.portfolio_summary['initial_capital']
         final = self.portfolio_summary['final_value']
         
         total_return = (final - initial) / initial
-        # Rendement annualisé (approximation)
+        # Annualized return (approximation)
         if not self.graph_data.empty: 
             days = (self.graph_data['timestamp'].max() - self.graph_data['timestamp'].min()).days
             print(f"Calculating annualized return over {days} days")
@@ -46,7 +46,7 @@ class PerformanceMetrics:
         }
     
     def _calculate_risk_metrics(self) -> Dict:
-        """Calcule les métriques de risque"""
+        """Calculates risk metrics"""
         if self.graph_data.empty:
             return {
                 'volatility': 0, 
@@ -58,10 +58,10 @@ class PerformanceMetrics:
         values = self.graph_data['total_value']
         returns = values.pct_change().dropna()
         
-        # Volatilité
+        # Volatility
         volatility = returns.std() * np.sqrt(252) if len(returns) > 1 else 0
         
-        # Drawdown maximum
+        # Maximum drawdown
         peak = values.cummax()
         drawdown = (values - peak) / peak * 100
         max_drawdown = drawdown.min()
@@ -88,7 +88,7 @@ class PerformanceMetrics:
         }
     
     def _calculate_trade_metrics(self) -> Dict:
-        """Calcule les métriques de trading"""
+        """Calculates trading metrics"""
         if self.trades_history.empty:
             return {'total_trades': 0, 'win_rate': 0, 'avg_trade_return': 0}
         
@@ -99,8 +99,8 @@ class PerformanceMetrics:
         
         total_trades = len(trades)
         
-        # Calcul win rate
-        # A implementer
+        # Win rate calculation
+        # To implement
         
         return {
             'total_trades': total_trades,
@@ -109,14 +109,14 @@ class PerformanceMetrics:
         }
     
     def _calculate_benchmark_metrics(self) -> Dict:
-        """Calcule les métriques vs benchmark (buy and hold)"""
+        """Calculates metrics vs benchmark (buy and hold)"""
         
-        # Rendement benchmark
+        # Benchmark return
         initial_value = self.graph_data.iloc[0]['benchmark']
         final_value = self.graph_data.iloc[-1]['benchmark']
         benchmark_return = (final_value - initial_value) / initial_value * 100 if initial_value != 0 else 0
 
-        # Rendement de la stratégie
+        # Strategy return
         strategy_return = self.return_metrics['total_return_pct']
 
         return {
@@ -125,10 +125,10 @@ class PerformanceMetrics:
         }
     
     def get_summary_report(self) -> str:
-        """Génère un rapport de synthèse"""
+        """Generates a summary report"""
         metrics = self.calculate_all_metrics()
         
-        # Extraction des valeurs avec chemins d'accès
+        # Extract values with access paths
         total_return = metrics['return_metrics']['total_return_pct']
         annualized_return = metrics['return_metrics']['annualized_return_pct']
         
@@ -145,24 +145,24 @@ class PerformanceMetrics:
         
         return f"""
     
-=== RAPPORT DE PERFORMANCE ===
+=== PERFORMANCE REPORT ===
 
-Rendement:
-- Rendement total: {total_return:.2f}%
-- Rendement annualisé: {annualized_return:.2f}%
+Return:
+- Total return: {total_return:.2f}%
+- Annualized return: {annualized_return:.2f}%
 
 Benchmark:
-- Rendement Buy & Hold: {benchmark_return:.2f}%
-- Outperformance de la stratégie: {excess_return:.2f}%
+- Buy & Hold return: {benchmark_return:.2f}%
+- Strategy outperformance: {excess_return:.2f}%
 
-Risque:
+Risk:
 - Sharpe ratio: {sharpe_ratio:.2f}
 - Sortino ratio: {sortino_ratio:.2f}
-- Drawdown max: {max_drawdown:.2f}%
-- Volatilité: {volatility:.2f}%
+- Max drawdown: {max_drawdown:.2f}%
+- Volatility: {volatility:.2f}%
 
 Trading:
-- Nombre de trades: {total_trades}
-- Taux de réussite: {win_rate:.2f}%
+- Number of trades: {total_trades}
+- Win rate: {win_rate:.2f}%
 
 """
