@@ -32,21 +32,24 @@ class DCA_strategy():
         signal_df = market_data.copy()
         signal_df['signal'] = None
         
-        # Signal d'achat au premier point
-        signal_df.at[signal_df.index[0], 'signal'] = {
-            'type': 'buy_market',
-            'params': {
-                'usdc_value': self.params['daily_investment']
-            },
-        }
-        
-        # Signal de vente au dernier point
-        signal_df.at[signal_df.index[-1], 'signal'] = {
-            'type': 'sell_market',
-            'params': {
-                'portion': 1
-            },
-        }
+        for i in range(1, len(signal_df)):
+            if signal_df.index[i].hour == 0 and signal_df.index[i].minute == 0:
+                # Signal d'achat quotidien
+                signal_df.at[signal_df.index[i], 'signal'] = {
+                    'type': 'buy_market',
+                    'params': {
+                        'usdc_value': self.params['daily_investment']
+                    },
+                }
+            
+            if signal_df.index[i].day == 1 and signal_df.index[i].hour == 0 and signal_df.index[i].minute == 0:
+                # Signal d'achat mensuel
+                signal_df.at[signal_df.index[i], 'signal'] = {
+                    'type': 'buy_market',
+                    'params': {
+                        'usdc_value': self.params['monthly_investment']
+                    },
+                }
         
         # Filtrer les signaux non nuls
         return signal_df[signal_df['signal'].notnull()]

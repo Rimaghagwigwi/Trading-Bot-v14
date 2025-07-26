@@ -12,6 +12,7 @@ venv/
 .venv/
 pip-log.txt
 pip-delete-this-directory.txt
+test.py
 
 # Données et logs
 *.log

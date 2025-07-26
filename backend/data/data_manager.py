@@ -53,7 +53,9 @@ class DataManager:
             if not new_data.empty:
                 df = pd.concat([df, new_data], ignore_index=True)
                 print("Data concatenated:", df)
-        
+            else:
+                raise ValueError(f"Aucune donnée récupérée pour {symbol} de {range_start} à {range_end}")
+
         # Nettoyer et sauvegarder
         if not df.empty:
             df = df.drop_duplicates(subset=['timestamp']).sort_values('timestamp')
