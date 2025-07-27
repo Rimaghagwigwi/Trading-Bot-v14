@@ -1,5 +1,5 @@
 """
-Main backtest engine
+Main backtest engine with enhanced portfolio management
 """
 
 from typing import Dict
@@ -15,9 +15,10 @@ from ..strategies.DCA_strategy import DCA_strategy
 logger = logging.getLogger(__name__)
 
 class BacktestEngine:
-    """Main engine to run backtests"""
+    """Main engine to run backtests with advanced order types"""
 
-    def __init__(self, initial_capital: float = 10000, commission_rate: float = 0.001, timeframe: str = '1h', pairs: list = []):
+    def __init__(self, initial_capital: float = 10000, commission_rate: float = 0.001, 
+                 timeframe: str = '1h', pairs: list = []):
         self.portfolio = Portfolio(initial_capital, commission_rate, pairs)
         self.strategy = None
         self.timeframe = pd.to_timedelta(timeframe)
@@ -26,7 +27,16 @@ class BacktestEngine:
 
     def set_strategy(self, strategy_params, strategy_class: str):
         """Set the trading strategy"""
-        self.strategy = globals()[strategy_class]()
+        strategy_map = {
+            'BuyAndHoldStrategy': BuyAndHoldStrategy,
+            'RSIStrategy': RSIStrategy,
+            'DCA_strategy': DCA_strategy
+        }
+        
+        if strategy_class not in strategy_map:
+            raise ValueError(f"Unknown strategy class: {strategy_class}")
+            
+        self.strategy = strategy_map[strategy_class]()
         self.strategy.set_params(strategy_params)
 
     def run_backtest(self, market_data: Dict[str, pd.DataFrame]) -> Dict:
@@ -37,45 +47,114 @@ class BacktestEngine:
         logger.info("Backtest started")
         self.portfolio.set_market_data(market_data)
         
-        # Generate trades
-        signals = {symbol: self.strategy.generate_signals(data) for symbol, data in market_data.items()}
-        for symbol, signal_df in signals.items():
-            signal_df['symbol'] = symbol
+        # Generate signals for all symbols
+        signals = {}
+        for symbol, data in market_data.items():
+            try:
+                symbol_signals = self.strategy.generate_signals(data)
+                if not symbol_signals.empty:
+                    symbol_signals['symbol'] = symbol
+                    signals[symbol] = symbol_signals
+            except Exception as e:
+                logger.warning(f"Failed to generate signals for {symbol}: {e}")
+                continue
+        
+        if not signals:
+            logger.warning("No signals generated for any symbol")
+            return self._create_empty_results()
         
         # Merge signals into a single DataFrame
         signals_df = pd.concat(signals.values(), ignore_index=False)
-        print(signals_df)
-
+        signals_df = signals_df.sort_index()  # Sort by timestamp
+        
         logger.info(f"{len(signals_df)} signals generated")
 
-        # Execute trades
-        start_ts = min(market_data[symbol].index.min() for symbol in market_data)
-        end_ts = max(market_data[symbol].index.max() for symbol in market_data)
+        # Execute backtest
+        self._execute_backtest(signals_df, market_data)
         
-        for ts in pd.date_range(start=start_ts, end=end_ts, freq=self.timeframe):
-            self.portfolio.update_graph_data(ts)
-            to_process = signals_df[signals_df.index == ts]
-            for _, row in to_process.iterrows():
-                trade = {
-                    'type': row['signal']['type'],
-                    'symbol': row['symbol'],
-                    'timestamp': ts,
-                    'params': row['signal']['params'],
-                }
-                self.portfolio.execute_trade(trade)
-            
         logger.info(f"{len(self.portfolio.trades)} trades executed")
 
-        # Convert DataFrames to dicts for JSON serialization
-        graph_data = self.portfolio.graph_data
-        trades_history = self.portfolio.trades
-        
-        # Final results with JSON conversion
-        results = {
-            'portfolio_summary': self.portfolio.get_summary(),
-            'trades_history': trades_history if trades_history else [],
-            'graph_data': graph_data if graph_data else {},
-        }
-
+        # Prepare results
+        results = self._prepare_results()
         logger.info("Backtest finished")
         return results
+
+    def _execute_backtest(self, signals_df: pd.DataFrame, market_data: Dict[str, pd.DataFrame]):
+        """Execute the backtest with signals and market data"""
+        # Get time range
+        start_ts = min(data.index.min() for data in market_data.values())
+        end_ts = max(data.index.max() for data in market_data.values())
+        
+        # Process each timestamp
+        for ts in pd.date_range(start=start_ts, end=end_ts, freq=self.timeframe):
+            # Update portfolio (this will process pending orders)
+            self.portfolio.update_graph_data(ts)
+            
+            # Process new signals at this timestamp
+            current_signals = signals_df[signals_df.index == ts]
+            
+            for _, signal_row in current_signals.iterrows():
+                if 'signal' not in signal_row or not signal_row['signal']:
+                    continue
+                    
+                trade = {
+                    'type': signal_row['signal']['type'],
+                    'symbol': signal_row['symbol'],
+                    'timestamp': ts,
+                    'params': signal_row['signal']['params'],
+                }
+                
+                try:
+                    self.portfolio.execute_trade(trade)
+                except Exception as e:
+                    logger.warning(f"Failed to execute trade at {ts}: {e}")
+                    continue
+
+    def _prepare_results(self) -> Dict:
+        """Prepare final results for output"""
+        # Convert graph data to proper format
+        graph_data_dict = {}
+        if self.portfolio.graph_data:
+            for key, values in self.portfolio.graph_data.items():
+                if key == 'timestamp':
+                    graph_data_dict[key] = [ts.isoformat() for ts in values]
+                else:
+                    graph_data_dict[key] = values
+
+        # Convert trades to serializable format
+        trades_list = []
+        for trade in self.portfolio.trades:
+            trade_dict = trade.copy()
+            if 'timestamp' in trade_dict:
+                trade_dict['timestamp'] = trade_dict['timestamp'].isoformat()
+            trades_list.append(trade_dict)
+
+        return {
+            'portfolio_summary': self.portfolio.get_summary(),
+            'trades_history': trades_list,
+            'graph_data': graph_data_dict,
+        }
+
+    def _create_empty_results(self) -> Dict:
+        """Create empty results when no signals are generated"""
+        return {
+            'portfolio_summary': {
+                'initial_capital': self.portfolio.initial_capital,
+                'final_value': self.portfolio.initial_capital,
+                'total_return': 0.0,
+                'benchmark_return': 0.0,
+                'cash': self.portfolio.cash,
+                'total_position_value': 0.0,
+                'positions': {},
+                'position_values': {},
+                'total_trades': 0,
+                'total_commission': 0.0,
+                'open_orders': 0
+            },
+            'trades_history': [],
+            'graph_data': {
+                'timestamp': [],
+                'total_value': [],
+                'benchmark': []
+            },
+        }

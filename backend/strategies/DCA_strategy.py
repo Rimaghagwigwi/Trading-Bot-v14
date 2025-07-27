@@ -34,7 +34,7 @@ class DCA_strategy():
             if signal_df.index[i].hour == 0 and signal_df.index[i].minute == 0:
                 # Daily buy signal
                 signal_df.at[signal_df.index[i], 'signal'] = {
-                    'type': 'buy_market',
+                    'type': 'buy',
                     'params': {
                         'usdc_value': self.params['daily_investment']
                     },
@@ -43,7 +43,7 @@ class DCA_strategy():
             if signal_df.index[i].day == 1 and signal_df.index[i].hour == 0 and signal_df.index[i].minute == 0:
                 # Monthly buy signal
                 signal_df.at[signal_df.index[i], 'signal'] = {
-                    'type': 'buy_market',
+                    'type': 'buy',
                     'params': {
                         'usdc_value': self.params['monthly_investment']
                     },

@@ -114,28 +114,63 @@ class BacktestManager {
 
     // Populate strategy parameter selects
     populateStrategyParams(strategy_name) {
-        const paramsContainer = document.getElementById('strategy-params-grid');
-        if (!paramsContainer) return;
-        
         const strategy = this.strategies.find(s => s.name === strategy_name);
+
         const params = strategy ? strategy.parameters : null;
+        const paramsContainer = document.getElementById('strategy-params-grid');
+        const paramsLabel = document.getElementById('strategy-params-label');
+        const paramsSeparation = document.getElementById('strategy-params-separation');
         console.log('Parameters fetched:', params);
 
-        if (!params || Object.keys(params).length === 0) {
-            return;
+        if (params && Object.keys(params).length > 0) {
+            paramsContainer.style.display = 'grid';
+            paramsContainer.innerHTML = ``;
+            paramsLabel.style.display = 'block';
+            paramsSeparation.style.display = 'block';
+    
+            Object.entries(params).forEach(([key, value]) => {
+                const paramItem = document.createElement('div');
+                paramItem.className = 'form-group';
+                paramItem.innerHTML = `
+                    <label class="form-label" for="${key}">${value.display_name}</label>
+                    <input class="form-input" type="number" id="${key}" value="${value.default}" step="any">
+                `;
+                paramsContainer.appendChild(paramItem);
+            });
+        } else {
+            paramsContainer.style.display = 'none';
+            paramsContainer.innerHTML = '';
+            paramsLabel.style.display = 'none';
+            paramsSeparation.style.display = 'none';
         }
-        paramsContainer.style.display = 'grid';
-        paramsContainer.innerHTML = ``;
-   
-        Object.entries(params).forEach(([key, value]) => {
-            const paramItem = document.createElement('div');
-            paramItem.className = 'form-group';
-            paramItem.innerHTML = `
-                <label class="form-label" for="${key}">${value.display_name}</label>
-                <input class="form-input" type="number" id="${key}" value="${value.default}" step="any">
-            `;
-            paramsContainer.appendChild(paramItem);
-        });
+
+        const riskParamsContainer = document.getElementById('risk-params-grid');
+        const riskParamsLabel = document.getElementById('risk-params-label');
+        const riskParamsSeparation = document.getElementById('risk-params-separation');
+        const risk_params = strategy ? strategy.risk_parameters : null;
+        console.log('Risk parameters fetched:', risk_params);
+
+        if (risk_params && Object.keys(risk_params).length > 0) {
+            riskParamsContainer.style.display = 'grid';
+            riskParamsContainer.innerHTML = ``;
+            riskParamsLabel.style.display = 'block';
+            riskParamsSeparation.style.display = 'block';
+
+            Object.entries(risk_params).forEach(([key, value]) => {
+                const paramItem = document.createElement('div');
+                paramItem.className = 'form-group';
+                paramItem.innerHTML = `
+                    <label class="form-label" for="${key}">${value.display_name}</label>
+                    <input class="form-input" type="number" id="${key}" value="${value.default}" step="any">
+                `;
+                riskParamsContainer.appendChild(paramItem);
+            });
+        } else {
+            riskParamsContainer.style.display = 'none';
+            riskParamsContainer.innerHTML = '';
+            riskParamsLabel.style.display = 'none';
+            riskParamsSeparation.style.display = 'none';
+        }
     }
 
     setupStrategyChangeListener() {
@@ -223,6 +258,11 @@ class BacktestManager {
             const value = document.getElementById(key).value;
             params[key] = parseFloat(value) || param.default; // Use default if input is invalid
         });
+        // Get risk parameters
+        Object.entries(strategy.risk_parameters || {}).forEach(([key, param]) => {
+            const value = document.getElementById(key).value;
+            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
+        });
 
         return params;
     }
@@ -298,7 +338,7 @@ class BacktestManager {
             const METRICS_CARDS = {
                 'Return': [
                     { id: 'total-return', label: 'Total Return', value: metrics['return_metrics']['total_return_pct'].toFixed(2) + '%'},
-                    { id: 'annualized-return', label: 'Annualized Return', value: metrics['return_metrics']['annualized_return_pct'].toFixed(2) + '%'}
+                    { id: 'cagr', label: 'CAGR', value: metrics['return_metrics']['cagr_pct'].toFixed(2) + '%'}
                 ],
                 'Comparison with Buy and Hold': [
                     { id: 'benchmark-return', label: 'Benchmark Return', value: metrics['benchmark_metrics']['benchmark_return_pct'].toFixed(2) + '%'},
@@ -307,11 +347,11 @@ class BacktestManager {
                 'Risk': [
                     { id: 'sharpe-ratio', label: 'Sharpe Ratio', value: metrics['risk_metrics']['sharpe_ratio'].toFixed(2)},
                     { id: 'sortino-ratio', label: 'Sortino Ratio', value: metrics['risk_metrics']['sortino_ratio'].toFixed(2)},
-                    { id: 'max-drawdown', label: 'Max Drawdown', value: metrics['risk_metrics']['max_drawdown_pct'].toFixed(2) + '%'},
+                    { id: 'max-drawdown', label: 'Max Drawdown', value: metrics['drawdown_metrics']['max_drawdown_pct'].toFixed(2) + '%'},
                     { id: 'volatility', label: 'Volatility', value: metrics['risk_metrics']['volatility_pct'].toFixed(2) + '%'}
                 ],
                 'Trade': [
-                    { id: 'total_trades', label: 'Total Trades', value: metrics['trade_metrics']['total_trades']},
+                    { id: 'total-trades', label: 'Total Trades', value: metrics['trade_metrics']['total_trades'].toFixed(0)},
                     { id: 'win-rate', label: 'Win Rate', value: metrics['trade_metrics']['win_rate_pct'].toFixed(2) + '%'},
                 ]
             };
@@ -321,19 +361,20 @@ class BacktestManager {
                 // Thresholds for each metric
                 const thresholds = {
                     'total-return': { win: 10, neutral: 0 },           // > 10% = win, 0-10% = neutral, < 0% = loss
-                    'annualized-return': { win: 15, neutral: 0 },      // > 15% = win
+                    'cagr': { win: 15, neutral: 0 },                   // > 15% = win
                     'benchmark-return': { win: 8, neutral: 0 },        // > 8% = win
                     'outperformance': { win: 5, neutral: 0 },          // > 5% = win
                     'sharpe-ratio': { win: 1.5, neutral: 1 },          // > 1.5 = win, 1-1.5 = neutral, < 1 = loss
                     'sortino-ratio': { win: 2, neutral: 1 },           // > 2 = win
                     'max-drawdown': { win: -5, neutral: -10 },         // > -5% = win, -5% to -10% = neutral, < -10% = loss
                     'volatility': { win: 15, neutral: 25 },            // < 15% = win, 15-25% = neutral, > 25% = loss
-                    'win-rate': { win: 60, neutral: 50 }               // > 60% = win, 50-60% = neutral, < 50% = loss
+                    'win-rate': { win: 60, neutral: 50 },              // > 60% = win, 50-60% = neutral, < 50% = loss
+                    'total-trades': { win: 1, neutral: 0 }             // > 1 = win, 0-1 = neutral, < 0 = loss
                 };
                 
                 // Neutral metrics (no coloring)
-                const neutralMetrics = ['total_trades'];
-                
+                const neutralMetrics = [];
+
                 if (neutralMetrics.includes(metricId)) {
                     return '';
                 }
@@ -344,7 +385,7 @@ class BacktestManager {
                 }
                 
                 const numericValue = parseFloat(value.replace('%', ''));
-                
+
                 // Metrics where lower is better
                 const lowerIsBetter = ['max-drawdown', 'volatility'];
                 

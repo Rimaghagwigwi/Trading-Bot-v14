@@ -252,7 +252,7 @@ class ChartManager {
         const chart = window.LightweightCharts.createChart(chartContainer, this.chartOptions);
 
         // Prepare data
-        const timestamps = graph_data.timestamp;
+        const timestamps = graph_data.timestamps;
         const open = graph_data.open;
         const high = graph_data.high;
         const low = graph_data.low;

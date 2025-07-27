@@ -30,7 +30,7 @@ class BuyAndHoldStrategy():
 
         # Buy signal at the first point
         signal_df.at[signal_df.index[0], 'signal'] = {
-            'type': 'buy_market',
+            'type': 'buy',
             'params': {
                 'portion': self.params['portion_buy']
                 },
@@ -38,7 +38,7 @@ class BuyAndHoldStrategy():
         
         # Sell signal at the last point
         signal_df.at[signal_df.index[-1], 'signal'] = {
-            'type': 'sell_market',
+            'type': 'sell',
             'params': {
                 'portion': self.params['portion_sell']
                 },
