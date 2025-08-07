@@ -1,4 +1,6 @@
 WARNING: This project is at a dead state and probably won't work. I'm building a better version. I think I won't update it.
+For now, Trading Bot v16 is available, but not as evolved at this one. Trading Bot v15 will drop soon, and will be my best project for now. It is supposed to be a semi-pro quant tool.
+(Yes, v15 will be better and will drop later than v16)
 
 # Crypto Trading Bot Project
 
