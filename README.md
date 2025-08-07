@@ -1,3 +1,5 @@
+WARNING: This project is at a dead state and probably won't work. I'm building a better version. I think I won't update it.
+
 # Crypto Trading Bot Project
 
 ## 🎯 Project Overview
